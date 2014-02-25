@@ -1,6 +1,6 @@
 env:
   - SPEC=linux-g++
-  - SPEC=linux-clang
+  - SPEC=unsupported/linux-clang
 
 install:
   - cd test

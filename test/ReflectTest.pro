@@ -31,7 +31,7 @@ macx-clang {
 }
 
 linux-g++ {
-  QMAKE_CXXFLAGS += -std=c++11
+  QMAKE_CXXFLAGS += -std=c++0x
 }
 
 HEADERS += \
