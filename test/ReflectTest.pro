@@ -30,6 +30,10 @@ macx-clang {
   QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
 }
 
+linux-clang {
+  QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
+}
+
 linux-g++ {
   QMAKE_CXXFLAGS += -std=c++0x
 }
@@ -38,4 +42,6 @@ HEADERS += \
     ReflectTest.h \
     ../include/Reflect/FunctionBuilder.h \
     ../include/Reflect/Type.h \
-    ../include/Reflect/EmbeddedTypes.h
+    ../include/Reflect/EmbeddedTypes.h \
+    ../include/Reflect/Cpp11/FunctionBuilderImpl.h \
+    ../include/Reflect/Macro/FunctionBuilderImpl.h
