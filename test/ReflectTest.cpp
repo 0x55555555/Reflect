@@ -139,17 +139,21 @@ void EksReflectTest::functionWrapTest()
   QCOMPARE(method2.argumentType<0>(), findType<A *>());
   QCOMPARE(method3.argumentType<0>(), findType<const float &>());
 
-  QCOMPARE(decltype(method1)::Helper::Const::value, false);
-  QCOMPARE(decltype(method2)::Helper::Const::value, true);
-  QCOMPARE(decltype(method3)::Helper::Const::value, false);
+  typedef decltype(method1) Method1;
+  typedef decltype(method1) Method2;
+  typedef decltype(method1) Method3;
 
-  QCOMPARE(decltype(method1)::Helper::Static::value, false);
-  QCOMPARE(decltype(method2)::Helper::Static::value, false);
-  QCOMPARE(decltype(method3)::Helper::Static::value, true);
+  QCOMPARE(Method1::Helper::Const::value, false);
+  QCOMPARE(Method2::Helper::Const::value, true);
+  QCOMPARE(Method3::Helper::Const::value, false);
 
-  QCOMPARE(findType<decltype(method1)::Helper::Class>(), findType<A>());
-  QCOMPARE(findType<decltype(method2)::Helper::Class>(), findType<A>());
-  QCOMPARE(findType<decltype(method3)::Helper::Class>(), findType<void>());
+  QCOMPARE(Method1::Helper::Static::value, false);
+  QCOMPARE(Method2::Helper::Static::value, false);
+  QCOMPARE(Method3::Helper::Static::value, true);
+
+  QCOMPARE(findType<Method1::Helper::Class>(), findType<A>());
+  QCOMPARE(findType<Method2::Helper::Class>(), findType<A>());
+  QCOMPARE(findType<Method3::Helper::Class>(), findType<void>());
   }
 
 void EksReflectTest::functionInvokeTest()
