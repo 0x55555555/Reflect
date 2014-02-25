@@ -113,7 +113,7 @@ public:
 
   template <typename Fn> static Function build(const Fn &fn)
     {
-    return fn.buildInvocation<InvocationBuilder>();
+    return fn.template buildInvocation<InvocationBuilder>();
     }
   };
 
@@ -130,9 +130,9 @@ void EksReflectTest::functionWrapTest()
   QCOMPARE(method2.returnType(), findType<int>());
   QCOMPARE(method3.returnType(), findType<A*>());
 
-  QCOMPARE(method1.argumentCount(), 2U);
-  QCOMPARE(method2.argumentCount(), 1U);
-  QCOMPARE(method3.argumentCount(), 1U);
+  QCOMPARE((int)method1.argumentCount(), 2);
+  QCOMPARE((int)method2.argumentCount(), 1);
+  QCOMPARE((int)method3.argumentCount(), 1);
 
   QCOMPARE(method1.argumentType<0>(), findType<const float&>());
   QCOMPARE(method1.argumentType<1>(), findType<double*>());

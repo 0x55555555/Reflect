@@ -7,6 +7,60 @@ namespace Reflect
 namespace detail
 {
 
+/// \brief Holder for the indices
+template <std::size_t... Is> struct Indices { };
+/// \brief Build indices for a given size N.
+template <std::size_t N, std::size_t... Is> struct BuildIndices : BuildIndices<N-1, N-1, Is...> { };
+/// \overload
+/// \brief Specialistion of BuildIndices for 0.
+template <std::size_t... Is> struct BuildIndices<0, Is...> : Indices<Is...> { };
+
+/// \brief Call a function with a return type and pack the return.
+template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn, typename T> struct ReturnDispatch
+  {
+  /// \brief The CallerData required by InvHelper to call the function.
+  typedef typename InvHelper::CallData CallerData;
+
+  template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
+    {
+    typedef typename FunctionHelper::Class *Cls;
+    typedef typename FunctionHelper::Arguments Args;
+    // Get this for the class
+    auto ths = InvHelper::template getThis<Cls>(data);
+
+    // Call the function, unpacking arguments, collect the return.
+    auto result = FunctionHelper::template call<Fn>(
+      ths,
+      InvHelper::template unpackArgument<Idx, Args>(data)...
+      );
+
+    // Pack the return into data.
+    InvHelper::template packReturn<T>(data, std::move(result));
+    }
+  };
+
+/// \brief Call a function with no return type and pack the return.
+template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn> struct ReturnDispatch<InvHelper, FunctionHelper, Fn, void>
+  {
+  /// \brief The CallerData required by InvHelper to call the function.
+  typedef typename InvHelper::CallData CallerData;
+
+  template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
+    {
+    typedef typename FunctionHelper::Class *Cls;
+    typedef typename FunctionHelper::Arguments Args;
+
+    // Get this for the class
+    auto ths = InvHelper::template getThis<Cls>(data);
+
+    // Call the function, unpacking arguments.
+    FunctionHelper::template call<Fn>(
+      ths,
+      InvHelper::template unpackArgument<Idx, Args>(data)...
+      );
+    }
+  };
+
 /// \brief Helper class to create calls to functions.
 /// \param InvHelper      A user defined helper which knows how to pack and unpack arguments.
 /// \param FunctionHelper The type of the function to be wrapped - a specialised FunctionHelper<...>
@@ -26,56 +80,10 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     // Indices for the arguments.
     typedef BuildIndices<TupleSize::value> IndicesForFunction;
     // The correct dispatcher - based on the ReturnType.
-    typedef ReturnDispatch<typename FunctionHelper::ReturnType> Dispatch;
+    typedef ReturnDispatch<InvHelper, FunctionHelper, Fn, typename FunctionHelper::ReturnType> Dispatch;
 
     // call the function.
     Dispatch::call(data, IndicesForFunction());
-    }
-
-private:
-  /// \brief Holder for the indices
-  template <std::size_t... Is> struct Indices { };
-  /// \brief Build indices for a given size N.
-  template <std::size_t N, std::size_t... Is> struct BuildIndices : BuildIndices<N-1, N-1, Is...> { };
-  /// \overload
-  /// \brief Specialistion of BuildIndices for 0.
-  template <std::size_t... Is> struct BuildIndices<0, Is...> : Indices<Is...> { };
-
-  /// \brief Call a function with a return type and pack the return.
-  template <typename T> struct ReturnDispatch
-    {
-    template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
-      {
-      // Get this for the class
-      auto ths = InvHelper::getThis<FunctionHelper::Class*>(data);
-
-      // Call the function, unpacking arguments, collect the return.
-      auto result = FunctionHelper::call<Fn>(ths, unpack<Idx>(data)...);
-
-      // Pack the return into data.
-      InvHelper::packReturn<typename FunctionHelper::ReturnType>(data, std::move(result));
-      }
-    };
-
-  /// \brief Call a function with no return type and pack the return.
-  template <> struct ReturnDispatch<void>
-    {
-    template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
-      {
-      // Get this for the class
-      auto ths = InvHelper::getThis<FunctionHelper::Class*>(data);
-
-      // Call the function, unpacking arguments.
-      FunctionHelper::call<Fn>(ths, unpack<Idx>(data)...);
-      }
-    };
-
-  /// \brief unpack an argument from data and return it as the correct type.
-  template <std::size_t Index>
-      static typename std::tuple_element<Index, typename FunctionHelper::Arguments>::type
-      unpack(CallerData data)
-    {
-    return InvHelper::unpackArgument<Index, FunctionHelper::Arguments>(data);
     }
   };
 
@@ -106,7 +114,7 @@ public:
   typedef std::tuple<Args...> Arguments;
   typedef Rt(Class::*Signature)(Args...);
 
-  template <Signature Fn, typename... Args> static ReturnType call(Class* cls, Args... args)
+  template <Signature Fn> static ReturnType call(Class* cls, Args... args)
     {
     return (cls->*Fn)(std::forward<Args>(args)...);
     }
@@ -126,7 +134,7 @@ template <typename Rt, typename Cls, typename... Args>
   typedef std::tuple<Args...> Arguments;
   typedef Rt(Class::*Signature)(Args...) const;
 
-  template <Signature Fn, typename... Args> static ReturnType call(Class* cls, Args... args)
+  template <Signature Fn> static ReturnType call(Class* cls, Args... args)
     {
     return (cls->*Fn)(std::forward<Args>(args)...);
     }
@@ -146,7 +154,7 @@ template <typename Rt, typename... Args>
   typedef std::tuple<Args...> Arguments;
   typedef ReturnType (*Signature)(Args...);
 
-  template <Signature Fn, typename... Args> static ReturnType call(Class*, Args... args)
+  template <Signature Fn> static ReturnType call(Class*, Args... args)
     {
     return Fn(std::forward<Args>(args)...);
     }
@@ -187,7 +195,7 @@ public:
   template <typename T> typename T::Result buildInvocation() const
     {
     typedef detail::CallHelper<T, Helper, Fn> Builder;
-    return T::build<Builder>();
+    return T::template build<Builder>();
     }
 
   /// \internal

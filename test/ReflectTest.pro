@@ -25,6 +25,15 @@ win32-msvc2012 {
   # QMAKE_CXXFLAGS += /FS
 }
 
+macx-clang {
+  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+  QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
+}
+
+linux-clang {
+  QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
+}
+
 HEADERS += \
     ReflectTest.h \
     ../include/Reflect/FunctionBuilder.h \
