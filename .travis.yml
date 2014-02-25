@@ -9,7 +9,6 @@ install:
   - sudo apt-get install qt5-default clang
   - cd test
   - qmake -spec ${SPEC}
-  - make
 
 script:
-  - ls 
+  - make check

@@ -9,8 +9,10 @@ QT       += testlib
 QT       -= gui
 
 TARGET = tst_reflecttesttest
-CONFIG   += console
+CONFIG   += console testcase
 CONFIG   -= app_bundle
+
+DEFINES += REFLECT_MACRO_IMPL
 
 TEMPLATE = app
 
@@ -44,4 +46,5 @@ HEADERS += \
     ../include/Reflect/Type.h \
     ../include/Reflect/EmbeddedTypes.h \
     ../include/Reflect/Cpp11/FunctionBuilderImpl.h \
-    ../include/Reflect/Macro/FunctionBuilderImpl.h
+    ../include/Reflect/Macro/FunctionBuilderImpl.h \
+    ../include/Reflect/Macro/FunctionBuilderImplTemplate.h
