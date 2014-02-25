@@ -25,6 +25,7 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     {
     typedef typename FunctionHelper::Class *Cls;
     typedef typename FunctionHelper::Arguments Args;
+
     // Get this for the class
     auto ths = InvHelper::template getThis<Cls>(data);
 

@@ -1,5 +1,8 @@
+env:
+  - SPEC=linux-g++
+  - SPEC=linux-clang
+
 install:
   - cd test
-  - export QMAKESPEC=linux-clang
-  - qmake
+  - qmake -spec ${SPEC}
   - make
