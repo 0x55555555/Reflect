@@ -1,8 +1,8 @@
 env:
-  - SPEC=linux-g++
-  - SPEC=linux-clang
-  - VARIANT=debug
-  - VARIANT=release
+  - SPEC=linux-g++    VARIANT=debug
+  - SPEC=linux-clang  VARIANT=debug
+  - SPEC=linux-g++    VARIANT=release
+  - SPEC=linux-clang  VARIANT=release
 
 install:
   - sudo add-apt-repository --yes ppa:arigy/xfce
