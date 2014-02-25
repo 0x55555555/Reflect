@@ -10,3 +10,6 @@ install:
   - cd test
   - qmake -spec ${SPEC}
   - make
+
+script:
+  - ls 
