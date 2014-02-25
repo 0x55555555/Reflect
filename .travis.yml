@@ -1,4 +1,5 @@
 install:
   - cd test
+  - export QMAKESPEC=linux-clang
   - qmake
   - make
