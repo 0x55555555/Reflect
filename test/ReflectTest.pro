@@ -20,10 +20,12 @@ SOURCES += ReflectTest.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-win32-msvc2010 {
+win32-msvc2012 {
   QMAKE_CXXFLAGS += /FS
 }
 
 HEADERS += \
     ReflectTest.h \
-    ../include/Reflect/FunctionBuilder.h
+    ../include/Reflect/FunctionBuilder.h \
+    ../include/Reflect/Type.h \
+    ../include/Reflect/EmbeddedTypes.h

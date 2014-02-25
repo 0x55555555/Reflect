@@ -1,25 +1,24 @@
-#ifndef XREFLEXTEXT_H
-#define XREFLEXTEXT_H
+#ifndef XREFLECTTEXT_H
+#define XREFLECTTEXT_H
 
 #include "QObject"
 
-class EksReflexTest : public QObject
+class EksReflectTest : public QObject
   {
   Q_OBJECT
 
 public:
-  EksReflexTest()
+  EksReflectTest()
     {
     }
 
-  ~EksReflexTest()
+  ~EksReflectTest()
     {
     }
 
 private Q_SLOTS:
   void functionWrapTest();
   void functionInvokeTest();
-  void classWrapTest();
   };
 
-#endif // XREFLEXTEXT_H
+#endif // XREFLECTTEXT_H

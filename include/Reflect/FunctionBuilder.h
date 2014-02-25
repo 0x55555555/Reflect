@@ -1,9 +1,8 @@
 #pragma once
 #include <tuple>
+#include "Reflect/Type.h"
 
-namespace Eks
-{
-namespace Reflex
+namespace Reflect
 {
 namespace detail
 {
@@ -35,17 +34,17 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 
 private:
   /// \brief Holder for the indices
-  template <xsize... Is> struct Indices { };
+  template <std::size_t... Is> struct Indices { };
   /// \brief Build indices for a given size N.
-  template <xsize N, xsize... Is> struct BuildIndices : BuildIndices<N-1, N-1, Is...> { };
+  template <std::size_t N, std::size_t... Is> struct BuildIndices : BuildIndices<N-1, N-1, Is...> { };
   /// \overload
   /// \brief Specialistion of BuildIndices for 0.
-  template <xsize... Is> struct BuildIndices<0, Is...> : Indices<Is...> { };
+  template <std::size_t... Is> struct BuildIndices<0, Is...> : Indices<Is...> { };
 
   /// \brief Call a function with a return type and pack the return.
   template <typename T> struct ReturnDispatch
     {
-    template <typename xsize... Idx> static void call(CallerData data, Indices<Idx...>)
+    template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
       {
       // Get this for the class
       auto ths = InvHelper::getThis<FunctionHelper::Class*>(data);
@@ -61,7 +60,7 @@ private:
   /// \brief Call a function with no return type and pack the return.
   template <> struct ReturnDispatch<void>
     {
-    template <typename xsize... Idx> static void call(CallerData data, Indices<Idx...>)
+    template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
       {
       // Get this for the class
       auto ths = InvHelper::getThis<FunctionHelper::Class*>(data);
@@ -72,7 +71,7 @@ private:
     };
 
   /// \brief unpack an argument from data and return it as the correct type.
-  template <xsize Index>
+  template <std::size_t Index>
       static typename std::tuple_element<Index, typename FunctionHelper::Arguments>::type
       unpack(CallerData data)
     {
@@ -157,8 +156,8 @@ template <typename Rt, typename... Args>
 
 /// \brief Wrap a function of a given type. Allows extracting reflected
 ///        calls to the function.
-///        Call REFLEX_METHOD(function) after using REFLEX_CLASS, or
-///        typedefing ReflexClass to generate a FunctionWrap.
+///        Call REFLECT_METHOD(function) after using REFLECT_CLASS, or
+///        typedefing ReflectClass to generate a FunctionWrap.
 ///        Call buildInvocation on this function to build a reflected call
 ///        to the function.
 template <typename FnType, FnType Fn> class FunctionBuilder
@@ -192,7 +191,7 @@ public:
     }
 
   /// \internal
-  /// \brief Use REFLEX_METHOD and partners to create a FunctionWrap.
+  /// \brief Use REFLECT_METHOD and partners to create a FunctionWrap.
   FunctionBuilder(const char* name) : _name(name)
     {
     }
@@ -203,9 +202,8 @@ private:
   const char* _name;
   };
 
-#define REFLEX_FUNCTION_HELPER(cls) typedef cls ReflexClass
-#define REFLEX_METHOD_PTR(name) & ReflexClass::name
-#define REFLEX_METHOD(name) Eks::Reflex::FunctionBuilder<decltype(REFLEX_METHOD_PTR(name)), REFLEX_METHOD_PTR(name)>(#name)
+#define REFLECT_FUNCTION_HELPER(cls) typedef cls ReflectClass
+#define REFLECT_METHOD_PTR(name) & ReflectClass::name
+#define REFLECT_METHOD(name) Reflect::FunctionBuilder<decltype(REFLECT_METHOD_PTR(name)), REFLECT_METHOD_PTR(name)>(#name)
 
-}
 }

@@ -1,4 +1,5 @@
 #include "ReflectTest.h"
+#include "Reflect/EmbeddedTypes.h"
 #include "Reflect/FunctionBuilder.h"
 #include <QtTest>
 
@@ -41,9 +42,7 @@ public:
   int pork;
   };
 
-namespace Eks
-{
-namespace Reflex
+namespace Reflect
 {
 namespace detail
 {
@@ -58,18 +57,6 @@ template <> struct TypeResolver<A>
 
 }
 }
-}
-
-class TestBuilder : public Eks::Reflex::BuilderBase
-  {
-  Eks::Reflex::Symbol lookupSymbol(const char*) X_OVERRIDE
-    {
-    xAssertFail();
-    return Eks::Reflex::Symbol();
-    }
-
-  Eks::UnorderedMap<Eks::String*, Eks::Reflex::SymbolData> symbols;
-  };
 
 class InvocationBuilder
   {
@@ -105,7 +92,7 @@ public:
     return (T)args->_this;
     }
 
-  template <xsize I, typename Tuple>
+  template <std::size_t I, typename Tuple>
       static typename std::tuple_element<I, Tuple>::type unpackArgument(CallData args)
     {
     typedef typename std::tuple_element<I, Tuple>::type Arg;
@@ -130,14 +117,14 @@ public:
     }
   };
 
-void EksReflexTest::functionWrapTest()
+void EksReflectTest::functionWrapTest()
   {
-  using namespace Eks::Reflex;
-  typedef A ReflexClass;
+  using namespace Reflect;
+  typedef A ReflectClass;
 
-  auto method1 = REFLEX_METHOD(pork1);
-  auto method2 = REFLEX_METHOD(pork2);
-  auto method3 = REFLEX_METHOD(pork3);
+  auto method1 = REFLECT_METHOD(pork1);
+  auto method2 = REFLECT_METHOD(pork2);
+  auto method3 = REFLECT_METHOD(pork3);
 
   QCOMPARE(method1.returnType(), findType<void>());
   QCOMPARE(method2.returnType(), findType<int>());
@@ -165,14 +152,14 @@ void EksReflexTest::functionWrapTest()
   QCOMPARE(findType<decltype(method3)::Helper::Class>(), findType<void>());
   }
 
-void EksReflexTest::functionInvokeTest()
+void EksReflectTest::functionInvokeTest()
   {
-  using namespace Eks::Reflex;
-  typedef A ReflexClass;
+  using namespace Reflect;
+  typedef A ReflectClass;
 
-  auto method1 = REFLEX_METHOD(pork1);
-  auto method2 = REFLEX_METHOD(pork2);
-  auto method3 = REFLEX_METHOD(pork3);
+  auto method1 = REFLECT_METHOD(pork1);
+  auto method2 = REFLECT_METHOD(pork2);
+  auto method3 = REFLECT_METHOD(pork3);
 
   auto inv1 = method1.buildInvocation<InvocationBuilder>();
   auto inv2 = method2.buildInvocation<InvocationBuilder>();
@@ -216,21 +203,4 @@ void EksReflexTest::functionInvokeTest()
   QCOMPARE(result3->pork, SELF_VAL);
   }
 
-void EksReflexTest::classWrapTest()
-  {
-#if 0
-  auto owner = TestBuilder();
-  auto ns = REFLEX_NAMESPACE("", owner);
-  auto cls = REFLEX_CLASS(ClassBuilder, A, ns);
-
-  auto method1 = REFLEX_METHOD(pork1);
-  auto method2 = REFLEX_METHOD(pork2);
-  auto method3 = REFLEX_METHOD(pork3);
-
-  cls.add(method1);
-  cls.add(method2);
-  cls.add(method3);
-#endif
-  }
-
-QTEST_APPLESS_MAIN(EksReflexTest)
+QTEST_APPLESS_MAIN(EksReflectTest)
