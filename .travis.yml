@@ -1,6 +1,8 @@
 env:
   - SPEC=linux-g++
   - SPEC=linux-clang
+  - VARIANT=debug
+  - VARIANT=release
 
 install:
   - sudo add-apt-repository --yes ppa:arigy/xfce
@@ -8,7 +10,7 @@ install:
   - sudo apt-get update
   - sudo apt-get install qt5-default clang
   - cd test
-  - qmake -spec ${SPEC}
+  - qmake -spec ${SPEC} "CONFIG += ${VARIANT}"
 
 script:
   - make check
