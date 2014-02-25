@@ -34,6 +34,7 @@ macx-clang {
 
 linux-clang {
   QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
+  INCLUDEPATH += /usr/local/clang-3.3/lib/c++/v1/
 }
 
 linux-g++ {

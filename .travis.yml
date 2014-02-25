@@ -13,5 +13,4 @@ install:
   - qmake -spec ${SPEC} "CONFIG += ${VARIANT}"
 
 script:
-  - sudo find / -name 'algorithm'
   - make check
