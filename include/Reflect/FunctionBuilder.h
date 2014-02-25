@@ -1,10 +1,12 @@
 #pragma once
-#include "Reflect/Type.h"
 
 #ifdef REFLECT_MACRO_IMPL
+# include "Reflect/Macro/FunctionBuilderImpl.h"
 #else
 # include "Reflect/Cpp11/FunctionBuilderImpl.h"
 #endif
+
+#include "Reflect/Type.h"
 
 namespace Reflect
 {
