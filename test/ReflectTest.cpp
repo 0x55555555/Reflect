@@ -140,8 +140,8 @@ void EksReflectTest::functionWrapTest()
   QCOMPARE(method3.argumentType<0>(), findType<const float &>());
 
   typedef decltype(method1) Method1;
-  typedef decltype(method1) Method2;
-  typedef decltype(method1) Method3;
+  typedef decltype(method2) Method2;
+  typedef decltype(method3) Method3;
 
   QCOMPARE(Method1::Helper::Const::value, false);
   QCOMPARE(Method2::Helper::Const::value, true);
