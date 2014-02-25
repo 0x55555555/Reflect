@@ -21,7 +21,8 @@ SOURCES += ReflectTest.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 win32-msvc2012 {
-  QMAKE_CXXFLAGS += /FS
+  # needs enabling for msvc2013, which has no mkspec yet...
+  # QMAKE_CXXFLAGS += /FS
 }
 
 HEADERS += \
