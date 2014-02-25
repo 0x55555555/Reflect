@@ -1,9 +1,9 @@
 env:
   - SPEC=linux-g++
-  - SPEC=unsupported/linux-clang
+  - SPEC=linux-clang
 
 install:
-  - sudo apt-get install qbs qt5-default clang
+  - sudo apt-get install qt5-default clang
   - cd test
   - qmake -spec ${SPEC}
   - make
