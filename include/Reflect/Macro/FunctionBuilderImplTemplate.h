@@ -1,26 +1,21 @@
-#pragma once
-#include <tuple>
+#define JOIN(A, B) JOIN_IMPL(A, B)
+#define JOIN_IMPL(A, B) A##B
+#define CALL_HELPER_NAME JOIN(CallHelper, REFLEX_TEMPLATE_COUNT)
+#define UNPACK_HELPER(Idx) , InvHelper::template unpackArgument<Idx, Args>(data)
 
 namespace Reflect
 {
 namespace detail
 {
 
-/// \brief Holder for the indices
-template <std::size_t... Is> struct Indices { };
-/// \brief Build indices for a given size N.
-template <std::size_t N, std::size_t... Is> struct BuildIndices : BuildIndices<N-1, N-1, Is...> { };
-/// \overload
-/// \brief Specialistion of BuildIndices for 0.
-template <std::size_t... Is> struct BuildIndices<0, Is...> : Indices<Is...> { };
-
 /// \brief Call a function with a return type and pack the return.
-template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn, typename T> struct ReturnDispatch
+template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn, typename T>
+    struct ReturnDispatch<REFLEX_TEMPLATE_COUNT, InvHelper, FunctionHelper, Fn, T>
   {
   /// \brief The CallerData required by InvHelper to call the function.
   typedef typename InvHelper::CallData CallerData;
 
-  template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
+  static void call(CallerData data)
     {
     typedef typename FunctionHelper::Class *Cls;
     typedef typename FunctionHelper::Arguments Args;
@@ -30,8 +25,8 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 
     // Call the function, unpacking arguments, collect the return.
     auto result = FunctionHelper::template call<Fn>(
-      ths,
-      InvHelper::template unpackArgument<Idx, Args>(data)...
+      ths
+      REFLEX_TEMPLATE_UNPACK(UNPACK_HELPER)
       );
 
     // Pack the return into data.
@@ -40,12 +35,13 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
   };
 
 /// \brief Call a function with no return type and pack the return.
-template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn> struct ReturnDispatch<InvHelper, FunctionHelper, Fn, void>
+template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn>
+    struct ReturnDispatch<REFLEX_TEMPLATE_COUNT, InvHelper, FunctionHelper, Fn, void>
   {
   /// \brief The CallerData required by InvHelper to call the function.
   typedef typename InvHelper::CallData CallerData;
 
-  template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
+  static void call(CallerData data)
     {
     typedef typename FunctionHelper::Class *Cls;
     typedef typename FunctionHelper::Arguments Args;
@@ -55,35 +51,9 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 
     // Call the function, unpacking arguments.
     FunctionHelper::template call<Fn>(
-      ths,
-      InvHelper::template unpackArgument<Idx, Args>(data)...
+      ths
+      REFLEX_TEMPLATE_UNPACK(UNPACK_HELPER)
       );
-    }
-  };
-
-/// \brief Helper class to create calls to functions.
-/// \param InvHelper      A user defined helper which knows how to pack and unpack arguments.
-/// \param FunctionHelper The type of the function to be wrapped - a specialised FunctionHelper<...>
-/// \param Fn             The function to call.
-template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn>
-    struct CallHelper
-  {
-  /// \brief The CallerData required by InvHelper to call the function.
-  typedef typename InvHelper::CallData CallerData;
-
-  /// \brief Call to invoke the function.
-  /// \param data The data containing the arguments which are passed to the function.
-  static void call(CallerData data)
-    {
-    // The size of the tuple.
-    typedef std::tuple_size<typename FunctionHelper::Arguments> TupleSize;
-    // Indices for the arguments.
-    typedef BuildIndices<TupleSize::value> IndicesForFunction;
-    // The correct dispatcher - based on the ReturnType.
-    typedef ReturnDispatch<InvHelper, FunctionHelper, Fn, typename FunctionHelper::ReturnType> Dispatch;
-
-    // call the function.
-    Dispatch::call(data, IndicesForFunction());
     }
   };
 
@@ -100,10 +70,16 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 ///                     and arguments for the call.
 template <typename FnType> class FunctionHelper;
 
+#define TYPENAME_HELPER(Idx) , typename JOIN(Arg, Idx)
+#define ARG_HELPER(Idx) JOIN(Arg, Idx)
+#define PARAM_HELPER(Idx) , JOIN(Arg, Idx) JOIN(param, Idx)
+#define PARAM_FORWARD_HELPER(Idx) JOIN(param, Idx)
+
+
 /// \overload
 /// \brief FunctionHelper definition for a non-const member function.
-template <typename Rt, typename Cls, typename... Args>
-    class FunctionHelper<Rt(Cls::*)(Args...)>
+template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
+    class FunctionHelper<Rt(Cls::*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER))>
   {
 public:
   typedef std::integral_constant<bool, false> Const;
@@ -111,19 +87,19 @@ public:
 
   typedef Cls Class;
   typedef Rt ReturnType;
-  typedef std::tuple<Args...> Arguments;
-  typedef Rt(Class::*Signature)(Args...);
+  typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
+  typedef Rt(Class::*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER));
 
-  template <Signature Fn> static ReturnType call(Class* cls, Args... args)
+  template <Signature Fn> static ReturnType call(Class* cls REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
-    return (cls->*Fn)(std::forward<Args>(args)...);
+    return (cls->*Fn)(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
     }
   };
 
 /// \overload
 /// \brief FunctionHelper definition for a const member function.
-template <typename Rt, typename Cls, typename... Args>
-    class FunctionHelper<Rt(Cls::*)(Args...) const>
+template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
+    class FunctionHelper<Rt(Cls::*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)) const>
   {
   public:
   typedef std::integral_constant<bool, true> Const;
@@ -131,19 +107,19 @@ template <typename Rt, typename Cls, typename... Args>
 
   typedef Cls Class;
   typedef Rt ReturnType;
-  typedef std::tuple<Args...> Arguments;
-  typedef Rt(Class::*Signature)(Args...) const;
+  typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
+  typedef Rt(Class::*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)) const;
 
-  template <Signature Fn> static ReturnType call(Class* cls, Args... args)
+  template <Signature Fn> static ReturnType call(Class* cls REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
-    return (cls->*Fn)(std::forward<Args>(args)...);
+    return (cls->*Fn)(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
     }
   };
 
 /// \overload
 /// \brief FunctionHelper definition for a static function.
-template <typename Rt, typename... Args>
-    class FunctionHelper<Rt (*)(Args...)>
+template <typename Rt REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
+    class FunctionHelper<Rt (*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER))>
   {
   public:
   typedef std::integral_constant<bool, false> Const;
@@ -151,14 +127,24 @@ template <typename Rt, typename... Args>
 
   typedef void Class;
   typedef Rt ReturnType;
-  typedef std::tuple<Args...> Arguments;
-  typedef ReturnType (*Signature)(Args...);
+  typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
+  typedef ReturnType (*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER));
 
-  template <Signature Fn> static ReturnType call(Class*, Args... args)
+  template <Signature Fn> static ReturnType call(Class* REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
-    return Fn(std::forward<Args>(args)...);
+    return Fn(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
     }
   };
 
 }
 }
+
+#undef TYPENAME_HELPER
+#undef ARG_HELPER
+#undef PARAM_HELPER
+#undef PARAM_FORWARD_HELPER
+#undef CALL_HELPER_NAME
+#undef UNPACK_HELPER
+#undef JOIN
+#undef JOIN_IMPL
+#undef REFLEX_TEMPLATE_UNPACK
