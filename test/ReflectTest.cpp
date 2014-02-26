@@ -106,17 +106,6 @@ public:
     }
   };
 
-class ClassBuilder
-  {
-public:
-  typedef InvocationBuilder::Result Function;
-
-  template <typename Fn> static Function build(const Fn &fn)
-    {
-    return fn.template buildInvocation<InvocationBuilder>();
-    }
-  };
-
 void EksReflectTest::functionWrapTest()
   {
   using namespace Reflect;
