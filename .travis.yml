@@ -1,8 +1,12 @@
 env:
-  - SPEC=linux-g++    VARIANT=debug
-  - SPEC=linux-clang  VARIANT=debug
-  - SPEC=linux-g++    VARIANT=release
-  - SPEC=linux-clang  VARIANT=release
+  - SPEC=linux-g++    VARIANT=debug     QMAKE_EXTRA=""
+  - SPEC=linux-clang  VARIANT=debug     QMAKE_EXTRA=""
+  - SPEC=linux-g++    VARIANT=release   QMAKE_EXTRA=""
+  - SPEC=linux-clang  VARIANT=release   QMAKE_EXTRA=""
+  - SPEC=linux-g++    VARIANT=debug     QMAKE_EXTRA="DEFINES += REFLECT_MACRO_IMPL"
+  - SPEC=linux-clang  VARIANT=debug     QMAKE_EXTRA="DEFINES += REFLECT_MACRO_IMPL"
+  - SPEC=linux-g++    VARIANT=release   QMAKE_EXTRA="DEFINES += REFLECT_MACRO_IMPL"
+  - SPEC=linux-clang  VARIANT=release   QMAKE_EXTRA="DEFINES += REFLECT_MACRO_IMPL"
 
 install:
   - sudo add-apt-repository --yes ppa:arigy/xfce
@@ -10,7 +14,7 @@ install:
   - sudo apt-get update
   - sudo apt-get install qt5-default clang
   - cd test
-  - qmake -spec ${SPEC} "CONFIG += ${VARIANT}"
+  - qmake -spec ${SPEC} "CONFIG += ${VARIANT}" ${QMAKE_EXTRA}
 
 script:
   - make check

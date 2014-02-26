@@ -12,8 +12,6 @@ TARGET = tst_reflecttesttest
 CONFIG   += console testcase
 CONFIG   -= app_bundle
 
-DEFINES += REFLECT_MACRO_IMPL
-
 TEMPLATE = app
 
 INCLUDEPATH += ../include/
