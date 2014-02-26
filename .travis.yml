@@ -14,7 +14,7 @@ install:
   - sudo apt-get update
   - sudo apt-get install qt5-default clang
   - cd test
-  - qmake -spec ${SPEC} "CONFIG += ${VARIANT}" ${QMAKE_EXTRA}
+  - qmake -spec ${SPEC} "CONFIG += ${VARIANT}\n${QMAKE_EXTRA}"
 
 script:
   - make check
