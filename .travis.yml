@@ -1,3 +1,5 @@
+language: cpp
+
 env:
   - SPEC=linux-g++    VARIANT=debug     QMAKE_EXTRA=""
   - SPEC=linux-clang  VARIANT=debug     QMAKE_EXTRA=""
