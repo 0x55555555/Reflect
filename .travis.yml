@@ -19,5 +19,4 @@ install:
   - qmake -spec ${SPEC} "CONFIG += ${VARIANT}\n${QMAKE_EXTRA}"
 
 script:
-  - sudo find / -name 'c++config.h'
   - make check
