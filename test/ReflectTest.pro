@@ -33,7 +33,7 @@ macx-clang {
 
 linux-clang {
   QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
-  INCLUDEPATH += /usr/include/c++/4.6/
+  INCLUDEPATH += /usr/include/c++/4.6/ /usr/include/c++/4.6/i686-linux-gnu
 }
 
 linux-g++ {
