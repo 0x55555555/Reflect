@@ -14,7 +14,11 @@ public:
     m_error = "Expected '" + m_expected->name() + "' got '" + m_actual->name() + "'";
     }
 
-  const char* what() const throw() override
+  ~TypeException() throw()
+    {
+    }
+
+  const char* what() const throw()
     {
     return m_error.c_str();
     }
