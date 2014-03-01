@@ -16,7 +16,8 @@ TEMPLATE = app
 
 INCLUDEPATH += ../include/
 
-SOURCES += ReflectTest.cpp
+SOURCES += ReflectTest.cpp \
+    TyperTest.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -26,7 +27,7 @@ win32-msvc2012 {
 }
 
 macx-clang {
-  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
   QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
 }
 
@@ -46,4 +47,10 @@ HEADERS += \
     ../include/Reflect/EmbeddedTypes.h \
     ../include/Reflect/Cpp11/FunctionBuilderImpl.h \
     ../include/Reflect/Macro/FunctionBuilderImpl.h \
-    ../include/Reflect/Macro/FunctionBuilderImplTemplate.h
+    ../include/Reflect/Macro/FunctionBuilderImplTemplate.h \
+    ../include/Crate/TypeException.h \
+    ../include/Crate/BaseTraits.h \
+    ../include/Crate/CopyTraits.h \
+    ../include/Crate/ReferenceTraits.h \
+    ../include/Crate/Traits.h \
+    ../include/Crate/ReferenceNonCleanedTraits.h

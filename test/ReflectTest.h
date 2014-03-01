@@ -1,24 +1,24 @@
-#ifndef XREFLECTTEXT_H
-#define XREFLECTTEXT_H
-
+#pragma once
 #include "QObject"
 
-class EksReflectTest : public QObject
+class ReflectTest : public QObject
   {
   Q_OBJECT
 
 public:
-  EksReflectTest()
+  ReflectTest()
     {
     }
 
-  ~EksReflectTest()
+  ~ReflectTest()
     {
     }
 
 private Q_SLOTS:
   void functionWrapTest();
   void functionInvokeTest();
+  void typeCheckTest();
+  void copyableTyperTest();
+  void nonCopyableTyperTest();
+  void nonCopyableNonCleanedTyperTest();
   };
-
-#endif // XREFLECTTEXT_H

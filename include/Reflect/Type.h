@@ -1,12 +1,29 @@
 #pragma once
 
 #include <type_traits>
+#include <string>
 
 namespace Reflect
 {
 
 class Type
   {
+public:
+  Type(const char *n) : m_name(n)
+    {
+    }
+
+  ~Type()
+    {
+    }
+
+  const std::string &name() const
+    {
+    return m_name;
+    }
+
+private:
+  std::string m_name;
   };
 
 namespace detail

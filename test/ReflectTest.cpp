@@ -50,7 +50,7 @@ template <> struct TypeResolver<A>
   {
   static const Type *find()
     {
-    static Type t;
+    static Type t("A");
     return &t;
     }
   };
@@ -106,7 +106,7 @@ public:
     }
   };
 
-void EksReflectTest::functionWrapTest()
+void ReflectTest::functionWrapTest()
   {
   using namespace Reflect;
   typedef A ReflectClass;
@@ -145,7 +145,7 @@ void EksReflectTest::functionWrapTest()
   QCOMPARE(findType<Method3::Helper::Class>(), findType<void>());
   }
 
-void EksReflectTest::functionInvokeTest()
+void ReflectTest::functionInvokeTest()
   {
   using namespace Reflect;
   typedef A ReflectClass;
@@ -196,4 +196,4 @@ void EksReflectTest::functionInvokeTest()
   QCOMPARE(result3->pork, SELF_VAL);
   }
 
-QTEST_APPLESS_MAIN(EksReflectTest)
+QTEST_APPLESS_MAIN(ReflectTest)

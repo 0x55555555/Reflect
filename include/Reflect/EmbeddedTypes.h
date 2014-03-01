@@ -20,7 +20,7 @@ enum EmbeddedType
 
 #define EMBEDDED_TYPE(type) \
   template <> struct TypeResolver<type> { \
-  static const Type *find() { static Type t; return &t; } };
+  static const Type *find() { static Type t(#type); return &t; } };
 
 EMBEDDED_TYPE(void)
 EMBEDDED_TYPE(bool)
