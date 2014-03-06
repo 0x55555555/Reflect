@@ -11,7 +11,7 @@ template <std::size_t I, typename Tuple, typename Fwd> class InjectorArgGetter
 public:
   static typename std::tuple_element<I, Tuple>::type unpackArgument(typename Fwd::CallData args)
     {
-    return Fwd::unpackArgument<I, Tuple>(args);
+    return Fwd::template unpackArgument<I, Tuple>(args);
     }
   };
 
@@ -21,7 +21,7 @@ public:
   typedef typename std::tuple_element<0, Tuple>::type Result;
   static Result unpackArgument(typename Fwd::CallData args)
     {
-    return Fwd::getThis<Result>(args);
+    return Fwd::template getThis<Result>(args);
     }
   };
 }
