@@ -15,7 +15,9 @@ public:
     }
 
 private Q_SLOTS:
+  void methodWrapTest();
   void functionWrapTest();
+  void methodInjectionTest();
   void functionInvokeTest();
   void typeCheckTest();
   void copyableTyperTest();

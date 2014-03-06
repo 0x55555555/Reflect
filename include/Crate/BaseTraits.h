@@ -37,7 +37,7 @@ public:
     {
     if (!canUnbox(ifc, data))
       {
-      throw TypeException{ getType(), ifc->getType(data) };
+      throw TypeException(getType(), ifc->getType(data));
       }
     }
 

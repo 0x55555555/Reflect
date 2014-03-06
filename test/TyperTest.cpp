@@ -177,7 +177,7 @@ void ReflectTest::typeCheckTest()
     {
     auto vec3 = boxer.create<Vector3Traits>();
 
-    Vector3 vec3Data{ 1, 2, 3 };
+    Vector3 vec3Data(1, 2, 3);
 
     QCOMPARE(ctorCount, 1);
     QCOMPARE(dtorCount, 0);
@@ -227,7 +227,7 @@ void ReflectTest::copyableTyperTest()
     {
     auto vec3 = boxer.create<Vector3Traits>();
 
-    Vector3 vec3Data{ 1, 2, 3 };
+    Vector3 vec3Data(1, 2, 3);
 
     QCOMPARE(ctorCount, 1);
     QCOMPARE(dtorCount, 0);

@@ -60,6 +60,8 @@ private:
   };
 
 #define REFLECT_FUNCTION_HELPER(cls) typedef cls ReflectClass
+#define REFLECT_FUNCTION_PTR(name) &name
+#define REFLECT_FUNCTION(name) Reflect::FunctionBuilder<decltype(REFLECT_FUNCTION_PTR(name)), REFLECT_FUNCTION_PTR(name)>(#name)
 #define REFLECT_METHOD_PTR(name) & ReflectClass::name
 #define REFLECT_METHOD(name) Reflect::FunctionBuilder<decltype(REFLECT_METHOD_PTR(name)), REFLECT_METHOD_PTR(name)>(#name)
 

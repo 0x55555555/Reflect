@@ -33,6 +33,15 @@ template <size_t ArgCount, typename InvHelper, typename FunctionHelper, typename
 #undef REFLEX_TEMPLATE_UNPACK
 #undef REFLEX_TEMPLATE_UNPACK_COMMA
 
+
+#define REFLEX_TEMPLATE_COUNT 3
+#define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2)
+#define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2)
+#include "Reflect/Macro/FunctionBuilderImplTemplate.h"
+#undef REFLEX_TEMPLATE_COUNT
+#undef REFLEX_TEMPLATE_UNPACK
+#undef REFLEX_TEMPLATE_UNPACK_COMMA
+
 namespace Reflect
 {
 namespace detail

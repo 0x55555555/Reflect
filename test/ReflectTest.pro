@@ -21,6 +21,8 @@ SOURCES += ReflectTest.cpp \
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
+#DEFINES += REFLECT_MACRO_IMPL
+
 win32-msvc2012 {
   # needs enabling for msvc2013, which has no mkspec yet...
   # QMAKE_CXXFLAGS += /FS
@@ -53,4 +55,5 @@ HEADERS += \
     ../include/Crate/CopyTraits.h \
     ../include/Crate/ReferenceTraits.h \
     ../include/Crate/Traits.h \
-    ../include/Crate/ReferenceNonCleanedTraits.h
+    ../include/Crate/ReferenceNonCleanedTraits.h \
+    ../include/Reflect/MethodInjectorBuilder.h

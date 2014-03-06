@@ -1,5 +1,6 @@
 #include "ReflectTest.h"
 #include "Reflect/EmbeddedTypes.h"
+#include "Reflect/MethodInjectorBuilder.h"
 #include "Reflect/FunctionBuilder.h"
 #include <QtTest>
 
@@ -41,6 +42,13 @@ public:
 
   int pork;
   };
+
+void staticMethod(A *a, int i, float e)
+  {
+  QCOMPARE_NO_RETURN(a == nullptr, true);
+  QCOMPARE_NO_RETURN(i, INT_VAL);
+  QCOMPARE_NO_RETURN(e, FLOAT_VAL);
+  }
 
 namespace Reflect
 {
@@ -106,7 +114,7 @@ public:
     }
   };
 
-void ReflectTest::functionWrapTest()
+void ReflectTest::methodWrapTest()
   {
   using namespace Reflect;
   typedef A ReflectClass;
@@ -143,6 +151,52 @@ void ReflectTest::functionWrapTest()
   QCOMPARE(findType<Method1::Helper::Class>(), findType<A>());
   QCOMPARE(findType<Method2::Helper::Class>(), findType<A>());
   QCOMPARE(findType<Method3::Helper::Class>(), findType<void>());
+  }
+
+void ReflectTest::functionWrapTest()
+  {
+  using namespace Reflect;
+  auto fn = REFLECT_FUNCTION(staticMethod);
+
+  A *a = nullptr;
+  int b = INT_VAL;
+  float c = FLOAT_VAL;
+
+  auto inv1 = fn.buildInvocation<InvocationBuilder>();
+
+  void *args1[] = { (void*)&a, &b, &c };
+  InvocationBuilder::Arguments data1 = { args1, nullptr, nullptr };
+
+  try
+    {
+    inv1.fn(&data1);
+    }
+  catch(...)
+    {
+    }
+  }
+
+void ReflectTest::methodInjectionTest()
+  {
+  using namespace Reflect;
+  auto fn = REFLECT_FUNCTION(staticMethod);
+
+  A *a = nullptr;
+  int b = INT_VAL;
+  float c = FLOAT_VAL;
+
+  auto inv1 = fn.buildInvocation<MethodInjectorBuilder<InvocationBuilder>>();
+
+  void *args1[] = { (void*)&a, &b, &c };
+  InvocationBuilder::Arguments data1 = { args1, nullptr, nullptr };
+
+  try
+    {
+    inv1.fn(&data1);
+    }
+  catch(...)
+    {
+    }
   }
 
 void ReflectTest::functionInvokeTest()
