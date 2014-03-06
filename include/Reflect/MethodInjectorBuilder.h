@@ -34,7 +34,7 @@ public:
 
   template <typename Builder> static Result build()
     {
-    return Fwd::build<Builder>();
+    return Fwd::template build<Builder>();
     }
 
   template <typename Builder> static void call(CallData data)
