@@ -1,7 +1,7 @@
 #define JOIN(A, B) JOIN_IMPL(A, B)
 #define JOIN_IMPL(A, B) A##B
 #define CALL_HELPER_NAME JOIN(CallHelper, REFLEX_TEMPLATE_COUNT)
-#define UNPACK_HELPER(Idx) , InvHelper::template unpackArgument<Idx, Args>(data)
+#define UNPACK_HELPER(Idx) , InvHelper::template unpackArgument<Idx, std::tuple_element<Idx, Args>::type>(data)
 
 namespace Reflect
 {

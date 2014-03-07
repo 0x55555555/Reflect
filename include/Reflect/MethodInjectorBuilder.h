@@ -6,22 +6,21 @@ namespace Reflect
 namespace detail
 {
 
-template <std::size_t I, typename Tuple, typename Fwd> class InjectorArgGetter
+template <std::size_t I, typename Arg, typename Fwd> class InjectorArgGetter
   {
 public:
-  static typename std::tuple_element<I, Tuple>::type unpackArgument(typename Fwd::CallData args)
+  static Arg unpackArgument(typename Fwd::CallData args)
     {
-    return Fwd::template unpackArgument<I, Tuple>(args);
+    return Fwd::template unpackArgument<I-1, Arg>(args);
     }
   };
 
-template <typename Tuple, typename Fwd> class InjectorArgGetter<0, Tuple, Fwd>
+template <typename Arg, typename Fwd> class InjectorArgGetter<0, Arg, Fwd>
   {
 public:
-  typedef typename std::tuple_element<0, Tuple>::type Result;
-  static Result unpackArgument(typename Fwd::CallData args)
+  static Arg unpackArgument(typename Fwd::CallData args)
     {
-    return Fwd::template getThis<Result>(args);
+    return Fwd::template getThis<Arg>(args);
     }
   };
 }
@@ -47,10 +46,10 @@ public:
     return nullptr;
     }
 
-  template <std::size_t I, typename Tuple>
-      static typename std::tuple_element<I, Tuple>::type unpackArgument(CallData args)
+  template <std::size_t I, typename Arg>
+      static Arg unpackArgument(CallData args)
     {
-    return detail::InjectorArgGetter<I, Tuple, Fwd>::unpackArgument(args);
+    return detail::InjectorArgGetter<I, Arg, Fwd>::unpackArgument(args);
     }
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)

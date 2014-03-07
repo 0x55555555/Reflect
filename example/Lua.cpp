@@ -1,6 +1,7 @@
 #include "Reflect/FunctionBuilder.h"
 #include "lua.h"
 #include <cstdlib>
+#include <stdint.h>
 
 /// \brief This is a little helper (doesnt work!) which casts types to the correct value.
 struct TypeHelper
@@ -45,10 +46,12 @@ public:
   /// \brief Lua entrypoint for the call.
   template <typename Builder> static int call(lua_State *L)
     {
+    typedef typename Builder::FunctionHelper Helper;
+    typedef typename Helper::Static Static;
     // set up the call data
     CallData data = {
       L,
-      Builder::FunctionHelper::Static::value ? 0 : 1,
+      Static::value ? 0 : 1,
       0
     };
 
@@ -78,10 +81,9 @@ public:
     }
 
   /// \brief Get the argument for the parameter [I]th parameter.
-  template <std::size_t I, typename Tuple>
-      static typename std::tuple_element<I, Tuple>::type unpackArgument(CallData args)
+  template <std::size_t I, typename Arg>
+      static Arg unpackArgument(CallData args)
     {
-    typedef typename std::tuple_element<I, Tuple>::type Arg;
     typedef typename std::remove_reference<Arg>::type NoRef;
     return TypeHelper::getStackArg<NoRef>(args.state, args.argOffset + I + 1);
     }

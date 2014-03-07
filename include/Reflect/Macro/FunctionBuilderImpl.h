@@ -50,11 +50,12 @@ namespace detail
 /// \param InvHelper      A user defined helper which knows how to pack and unpack arguments.
 /// \param FunctionHelper The type of the function to be wrapped - a specialised FunctionHelper<...>
 /// \param Fn             The function to call.
-template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::Signature Fn>
+template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     struct CallHelper
   {
   /// \brief The CallerData required by InvHelper to call the function.
   typedef typename InvHelper::CallData CallerData;
+      typedef _FunctionHelper FunctionHelper;
 
   /// \brief Call to invoke the function.
   /// \param data The data containing the arguments which are passed to the function.

@@ -100,10 +100,9 @@ public:
     return (T)args->_this;
     }
 
-  template <std::size_t I, typename Tuple>
-      static typename std::tuple_element<I, Tuple>::type unpackArgument(CallData args)
+  template <std::size_t I, typename Arg>
+      static Arg unpackArgument(CallData args)
     {
-    typedef typename std::tuple_element<I, Tuple>::type Arg;
     typedef typename std::remove_reference<Arg>::type NoRef;
     return *(NoRef*)args->_args[I];
     }
@@ -181,13 +180,12 @@ void ReflectTest::methodInjectionTest()
   using namespace Reflect;
   auto fn = REFLECT_FUNCTION(staticMethod);
 
-  A *a = nullptr;
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
   auto inv1 = fn.buildInvocation<MethodInjectorBuilder<InvocationBuilder>>();
 
-  void *args1[] = { (void*)&a, &b, &c };
+  void *args1[] = { &b, &c };
   InvocationBuilder::Arguments data1 = { args1, nullptr, nullptr };
 
   try
