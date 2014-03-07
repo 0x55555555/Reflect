@@ -40,6 +40,11 @@ public:
     return &a;
     }
 
+  std::tuple<int, float, double> multiReturn()
+    {
+    return std::make_tuple(5, 6.4f, 5.0);
+    }
+
   int pork;
   };
 
@@ -110,6 +115,48 @@ public:
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
     *(Return*)data->_result = result;
+    }
+  };
+
+
+class MultiReturnInvocationBuilder : public InvocationBuilder
+  {
+public:
+  class Arguments : public InvocationBuilder::Arguments
+    {
+  public:
+    Arguments(void *ths)
+      {
+      _args = nullptr;
+      _this = ths;
+      resultIndex = 0;
+      }
+
+    QVariant results[3];
+    size_t resultIndex;
+    };
+  typedef Arguments *CallData;
+
+  struct Result
+    {
+    typedef void (*Signature)(CallData);
+    Signature fn;
+    };
+
+  template <typename Return, typename T> static void packReturn(CallData data, T &&result)
+    {
+    *(Return*)data->_result = result;
+    }
+
+  template <typename Builder> static Result build()
+    {
+    Result r = { MultiReturnInvocationBuilder::call<Builder> };
+    return r;
+    }
+
+  template <typename Builder> static void call(CallData data)
+    {
+    Builder::call(data);
     }
   };
 
@@ -246,6 +293,28 @@ void ReflectTest::functionInvokeTest()
 
   QCOMPARE(result2, INT_VAL);
   QCOMPARE(result3->pork, SELF_VAL);
+  }
+
+void ReflectTest::multipleReturnTest()
+  {
+  //
+  using namespace Reflect;
+  typedef A ReflectClass;
+
+  auto method = REFLECT_METHOD(multiReturn);
+
+  auto inv = method.buildInvocation<MultiReturnInvocationBuilder>();
+
+  A ths;
+  MultiReturnInvocationBuilder::Arguments data1(&ths);
+
+  try
+    {
+    //inv.fn(&data1);
+    }
+  catch(...)
+    {
+    }
   }
 
 QTEST_APPLESS_MAIN(ReflectTest)

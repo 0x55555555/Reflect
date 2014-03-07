@@ -16,6 +16,7 @@ public:
 
 private Q_SLOTS:
   void methodWrapTest();
+  void multipleReturnTest();
   void functionWrapTest();
   void methodInjectionTest();
   void functionInvokeTest();
