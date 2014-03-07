@@ -31,7 +31,7 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     // Call the function, unpacking arguments, collect the return.
     auto result = FunctionHelper::template call<Fn>(
       ths,
-      InvHelper::template unpackArgument<Idx, std::tuple_element<Idx, Args>::type>(data)...
+      InvHelper::template unpackArgument<Idx, typename std::tuple_element<Idx, Args>::type>(data)...
       );
 
     // Pack the return into data.
@@ -56,7 +56,7 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     // Call the function, unpacking arguments.
     FunctionHelper::template call<Fn>(
       ths,
-      InvHelper::template unpackArgument<Idx, Args>(data)...
+      InvHelper::template unpackArgument<Idx, typename std::tuple_element<Idx, Args>::type>(data)...
       );
     }
   };

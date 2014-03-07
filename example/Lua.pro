@@ -20,7 +20,7 @@ SOURCES += Lua.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-DEFINES += REFLECT_MACRO_IMPL
+#DEFINES += REFLECT_MACRO_IMPL
 
 win32-msvc2012 {
   # needs enabling for msvc2013, which has no mkspec yet...
