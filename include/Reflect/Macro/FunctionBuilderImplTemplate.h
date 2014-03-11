@@ -30,7 +30,7 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
       );
 
     // Pack the return into data.
-    InvHelper::template packReturn<T>(data, std::move(result));
+    ReturnPacker<T, InvHelper>::pack(data, std::move(result));
     }
   };
 

@@ -145,7 +145,7 @@ public:
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
-    *(Return*)data->_result = result;
+    data->results[data->resultIndex++] = QVariant::fromValue(result);
     }
 
   template <typename Builder> static Result build()
@@ -310,11 +310,19 @@ void ReflectTest::multipleReturnTest()
 
   try
     {
-    //inv.fn(&data1);
+    inv.fn(&data1);
     }
   catch(...)
     {
     }
+
+  QVERIFY(data1.resultIndex == 3);
+  QVERIFY(data1.results[0].type() == QVariant::Int);
+  QVERIFY(data1.results[1].type() == qMetaTypeId<float>());
+  QVERIFY(data1.results[2].type() == QVariant::Double);
+  QVERIFY(data1.results[0].toInt() == 5);
+  QVERIFY(data1.results[1].toFloat() == 6.4f);
+  QVERIFY(data1.results[2].toDouble() == 5.0);
   }
 
 QTEST_APPLESS_MAIN(ReflectTest)
