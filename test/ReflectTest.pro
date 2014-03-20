@@ -57,4 +57,5 @@ HEADERS += \
     ../include/Crate/Traits.h \
     ../include/Crate/ReferenceNonCleanedTraits.h \
     ../include/Reflect/MethodInjectorBuilder.h \
-    ../include/Reflect/ReturnPacker.h
+    ../include/Reflect/ReturnPacker.h \
+    ../include/Crate/DerivedTraits.h

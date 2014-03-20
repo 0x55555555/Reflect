@@ -2,6 +2,7 @@
 #include "Crate/CopyTraits.h"
 #include "Crate/ReferenceTraits.h"
 #include "Crate/ReferenceNonCleanedTraits.h"
+#include "Crate/DerivedTraits.h"
 
 namespace Crate
 {
