@@ -33,14 +33,6 @@ public:
     return type == getType();
     }
 
-  template <typename Box> static void checkUnboxable(Box *ifc, typename Box::BoxedData data)
-    {
-    if (!canUnbox(ifc, data))
-      {
-      throw TypeException(getType(), ifc->getType(data));
-      }
-    }
-
   static const Reflect::Type *getType()
     {
     return Reflect::findType<T>();
@@ -51,6 +43,15 @@ public:
     T *mem = Derived::unbox(ifc, data);
     mem->~T();
     }
+
+  template <typename Box> static void checkUnboxable(Box *ifc, typename Box::BoxedData data)
+    {
+    if (!Derived::canUnbox(ifc, data))
+      {
+      throw TypeException(getType(), ifc->getType(data));
+      }
+    }
+
   };
 
 }
