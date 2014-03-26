@@ -15,12 +15,13 @@ public:
   typedef std::integral_constant<size_t, sizeof(T)> TypeSize;
   typedef std::integral_constant<size_t, std::alignment_of<T>::value> TypeAlignment;
 
-  typedef BaseTraits<T, DerivedTraits<T, Parent, Root>> BaseTraits;
+  typedef BaseTraits<T, DerivedTraits<T, Parent, Root>> BaseClassTraits;
   typedef Traits<Root> RootTraits;
 
   template<typename Box> static bool canUnbox(Box *ifc, typename Box::BoxedData data)
     {
-    return RootTraits::canUnbox(ifc, data) && CastHelper<Root, T>::canCast(ifc, data);
+    return RootTraits::canUnbox(ifc, data) &&
+      CastHelper<Root, T>::canCast(RootTraits::unbox(ifc, data));
     }
 
   template<typename Box> static T *unbox(Box *ifc, typename Box::BoxedData data)
@@ -32,10 +33,7 @@ public:
 
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
     {
-    ifc->initialise(data, RootTraits::getType(), BaseTraits::template cleanup<Box>);
-
-    auto memory = RootTraits::getMemory(ifc, data);
-    *memory = dataIn;
+    return RootTraits::box(ifc, data, dataIn);
     }
   };
 
