@@ -47,6 +47,11 @@ public:
     return std::make_tuple(5, 6.4f, 5.0);
     }
 
+  A()
+    {
+    pork = -1;
+    }
+
   int pork;
   };
 

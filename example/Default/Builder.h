@@ -118,7 +118,14 @@ public:
       throw Crate::TypeException(o->type, Reflect::findType<T>());
       }
 
-    return *reinterpret_cast<T*>(&o->d);
+    union
+    {
+        void *in;
+        T *out;
+    } conv;
+    conv.in = &o->d;
+
+    return *conv.out;
     }
 
   static void pack(Boxer *, Object *o, T t)
