@@ -247,17 +247,21 @@ public:
     std::size_t argCount;
     Object *ths;
 
-    Boxer *boxer;
-
     std::vector<Object> results;
     };
-  typedef Arguments *CallData;
+
+  struct Call
+    {
+    Arguments *args;
+    Boxer *boxer;
+    };
+  typedef Call *CallData;
 
   template <typename T> static T getThis(CallData args)
     {
     try
       {
-      return Caster<T>::cast(args->boxer, args->ths);
+      return Caster<T>::cast(args->boxer, args->args->ths);
       }
     catch(const Crate::TypeException &type)
       {
@@ -266,11 +270,11 @@ public:
     }
 
   template <std::size_t I, typename Arg>
-      static typename Caster<Arg>::Result unpackArgument(CallData args)
+      static typename Caster<Arg>::Result unpackArgument(CallData data)
     {
     try
       {
-      return Caster<Arg>::cast(args->boxer, args->args[I]);
+      return Caster<Arg>::cast(data->boxer, data->args->args[I]);
       }
     catch(const Crate::TypeException &type)
       {
@@ -280,8 +284,8 @@ public:
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
-    data->results.push_back(Object());
-    Object &b = data->results.back();
+    data->args->results.push_back(Object());
+    Object &b = data->args->results.back();
 
     Caster<Return>::pack(data->boxer, &b, result);
     }
