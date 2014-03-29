@@ -2,6 +2,7 @@
 #include "Crate/Traits.h"
 #include <memory>
 #include <QtTest>
+#include "../example/Default/Builder.h"
 
 static int ctorCount = 0;
 static int copyCount = 0;
@@ -114,56 +115,6 @@ template <> class Traits<NonCopyableReferencable> : public ReferenceNonCleanedTr
   };
 }
 
-class SampleBoxer
-  {
-public:
-  struct BoxedContainer;
-  typedef BoxedContainer *BoxedData;
-  typedef void (*Cleanup)(SampleBoxer *, BoxedData);
-
-  struct BoxedContainer
-    {
-    const Reflect::Type *m_type;
-    Cleanup m_clean;
-    uint8_t m_data[1];
-    };
-
-  template <typename Traits> struct BoxedDataTyped : BoxedContainer
-    {
-    typedef typename Traits::TypeSize Size;
-    typedef typename Traits::TypeAlignment Alignment;
-    // Add storage for type - minus 1 as there is one byte in BoxedData.
-    typename std::aligned_storage<Size::value-1, Alignment::value>::type m_extraData;
-    };
-
-  void initialise(BoxedContainer *data, const Reflect::Type *t, Cleanup clean)
-    {
-    data->m_type = t;
-    data->m_clean = clean;
-    }
-
-  const Reflect::Type *getType(BoxedContainer *data)
-    {
-    return data->m_type;
-    }
-
-  void* getMemory(BoxedContainer *data)
-    {
-    return data->m_data;
-    }
-
-  const void* getMemory(BoxedContainer *data) const
-    {
-    return data->m_data;
-    }
-
-  template <typename Traits> static std::unique_ptr<BoxedContainer> create()
-    {
-    return std::unique_ptr<BoxedContainer>(new BoxedDataTyped<Traits>());
-    }
-
-  };
-
 typedef Crate::Traits<Vector3> Vector3Traits;
 typedef Crate::Traits<NonCopyable> NonCopyableTraits;
 typedef Crate::Traits<NonCopyableReferencable> NonCopyableReferencableTraits;
@@ -173,7 +124,7 @@ void ReflectTest::typeCheckTest()
   ctorCount = 0;
   dtorCount = 0;
 
-  SampleBoxer boxer;
+  Reflect::example::Boxer boxer;
     {
     auto vec3 = boxer.create<Vector3Traits>();
 
@@ -211,7 +162,7 @@ void ReflectTest::typeCheckTest()
       }
     QVERIFY(caught);
 
-    vec3->m_clean(&boxer, vec3.get());
+    vec3 = nullptr;
 
     QCOMPARE(ctorCount, 1);
     QCOMPARE(dtorCount, 1);
@@ -223,7 +174,7 @@ void ReflectTest::copyableTyperTest()
   ctorCount = 0;
   dtorCount = 0;
 
-  SampleBoxer boxer;
+  Reflect::example::Boxer boxer;
     {
     auto vec3 = boxer.create<Vector3Traits>();
 
@@ -261,7 +212,7 @@ void ReflectTest::copyableTyperTest()
       }
     QVERIFY(caught);
 
-    vec3->m_clean(&boxer, vec3.get());
+    vec3 = nullptr;
 
     QCOMPARE(ctorCount, 1);
     QCOMPARE(dtorCount, 1);
@@ -274,7 +225,7 @@ void ReflectTest::nonCopyableTyperTest()
   copyCount = 0;
   dtorCount = 0;
 
-  SampleBoxer boxer;
+  Reflect::example::Boxer boxer;
     {
     auto nonCopyable = boxer.create<NonCopyableTraits>();
 
@@ -325,7 +276,7 @@ void ReflectTest::nonCopyableTyperTest()
     QCOMPARE(copyCount, 1);
     QCOMPARE(dtorCount, 0);
 
-    nonCopyable->m_clean(&boxer, nonCopyable.get());
+    nonCopyable = nullptr;
     QCOMPARE(dtorCount, 2);
     }
 
@@ -341,7 +292,7 @@ void ReflectTest::nonCopyableNonCleanedTyperTest()
   copyCount = 0;
   dtorCount = 0;
 
-  SampleBoxer boxer;
+  Reflect::example::Boxer boxer;
     {
     auto nonCopyable = boxer.create<NonCopyableReferencableTraits>();
 
@@ -389,7 +340,7 @@ void ReflectTest::nonCopyableNonCleanedTyperTest()
     QCOMPARE(copyCount, 1);
     QCOMPARE(dtorCount, 0);
 
-    nonCopyable->m_clean(&boxer, nonCopyable.get());
+    nonCopyable = nullptr;
     }
 
   QCOMPARE(ctorCount, 2);

@@ -15,7 +15,7 @@ public:
 
   typedef void (*Cleanup)(BoxingInterface *, BoxedData);
 
-  void initiate(BoxedData, const Type *, Cleanup);
+  void initialise(BoxedData, const Type *, Cleanup);
 
   const Type *getType(BoxedData);
 

@@ -50,9 +50,9 @@ public:
   int pork;
   };
 
-void staticMethod(A *a, int i, float e)
+void staticMethod(A &a, int i, float e)
   {
-  QCOMPARE_NO_RETURN(a == nullptr, true);
+  QCOMPARE_NO_RETURN(&a != nullptr, true);
   QCOMPARE_NO_RETURN(i, INT_VAL);
   QCOMPARE_NO_RETURN(e, FLOAT_VAL);
   }
@@ -138,16 +138,18 @@ void ReflectTest::functionWrapTest()
   using namespace Reflect;
   auto fn = REFLECT_FUNCTION(staticMethod);
 
-  A *a = nullptr;
+  A a;
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
   auto inv1 = fn.buildInvocation<InvocationBuilder>();
 
+  Reflect::example::Boxer boxer;
+
   Reflect::example::Object argVals[3];
   Reflect::example::Object *args1[3];
-  Reflect::example::initArgs(argVals, args1, a, b, c);
-  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, std::vector<Reflect::example::Object>() };
+  Reflect::example::initArgs(&boxer, argVals, args1, a, b, c);
+  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, &boxer, std::vector<Reflect::example::Object>() };
 
   try
     {
@@ -168,11 +170,17 @@ void ReflectTest::methodInjectionTest()
 
   auto inv1 = fn.buildInvocation<MethodInjectorBuilder<InvocationBuilder>>();
 
+  Reflect::example::Boxer boxer;
+
+  Reflect::example::Object thsVal;
+  Reflect::example::Object *thsValPtr;
+  Reflect::example::initArg(&boxer, thsVal, thsValPtr, A());
+
   Reflect::example::Object argVals[2];
-  Reflect::example::Caster<int>::pack(&argVals[0], b);
-  Reflect::example::Caster<float>::pack(&argVals[1], c);
+  Reflect::example::Caster<int>::pack(&boxer, &argVals[0], b);
+  Reflect::example::Caster<float>::pack(&boxer, &argVals[1], c);
   Reflect::example::Object *args1[3] = { &argVals[0], &argVals[1] };
-  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1 = { args1, 3, &thsVal, &boxer, std::vector<Reflect::example::Object>() };
 
   try
     {
@@ -207,28 +215,30 @@ void ReflectTest::functionInvokeTest()
   A* arg21 = &a;
   const float &arg31 = flt;
 
+  Reflect::example::Boxer boxer;
+
   Reflect::example::Object argVals1[2];
   Reflect::example::Object *args1[2];
-  Reflect::example::initArgs(argVals1, args1, arg11, arg12);
+  Reflect::example::initArgs(&boxer, argVals1, args1, arg11, arg12);
 
   Reflect::example::Object argVals2[1];
   Reflect::example::Object *args2[1];
-  Reflect::example::initArgs(argVals2, args2, arg21);
+  Reflect::example::initArgs(&boxer, argVals2, args2, arg21);
 
   Reflect::example::Object argVals3[1];
   Reflect::example::Object *args3[1];
-  Reflect::example::initArgs(argVals3, args3, arg31);
+  Reflect::example::initArgs(&boxer, argVals3, args3, arg31);
 
   A ths;
   ths.pork = SELF_VAL;
 
   Reflect::example::Object thsVal;
   Reflect::example::Object *thsValPtr;
-  Reflect::example::initArg(thsVal, thsValPtr, &ths);
+  Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
 
-  InvocationBuilder::Arguments data1 = { args1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
-  InvocationBuilder::Arguments data2 = { args2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
-  InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1 = { args1, 2, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data2 = { args2, 1, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
 
   try
     {
@@ -248,8 +258,8 @@ void ReflectTest::functionInvokeTest()
 
   QVERIFY(data2.results.size() == 1);
   QVERIFY(data3.results.size() == 1);
-  QCOMPARE(Reflect::example::Caster<int>::cast(&data2.results[0]), INT_VAL);
-  QCOMPARE(Reflect::example::Caster<A *>::cast(&data3.results[0])->pork, SELF_VAL);
+  QCOMPARE(Reflect::example::Caster<int>::cast(&boxer, &data2.results[0]), INT_VAL);
+  QCOMPARE(Reflect::example::Caster<A *>::cast(&boxer, &data3.results[0])->pork, SELF_VAL);
   }
 
 void ReflectTest::multipleReturnTest()
@@ -262,11 +272,13 @@ void ReflectTest::multipleReturnTest()
 
   auto inv = method.buildInvocation<InvocationBuilder>();
 
+  Reflect::example::Boxer boxer;
+
   A ths;
   Reflect::example::Object thsVal;
   Reflect::example::Object *thsValPtr;
-  Reflect::example::initArg(thsVal, thsValPtr, &ths);
-  InvocationBuilder::Arguments data1 = { 0, 0, thsValPtr, std::vector<Reflect::example::Object>() };
+  Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
+  InvocationBuilder::Arguments data1 = { 0, 0, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
 
   try
     {
