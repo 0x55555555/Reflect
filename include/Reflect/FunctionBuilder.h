@@ -46,23 +46,12 @@ public:
     typedef detail::CallHelper<T, Helper, Fn> Builder;
     return T::template build<Builder>();
     }
-
-  /// \internal
-  /// \brief Use REFLECT_METHOD and partners to create a FunctionWrap.
-  FunctionBuilder(const char* name) : _name(name)
-    {
-    }
-
-  const char* name() const { return _name; }
-
-private:
-  const char* _name;
   };
 
 #define REFLECT_FUNCTION_HELPER(cls) typedef cls ReflectClass
 #define REFLECT_FUNCTION_PTR(name) &name
-#define REFLECT_FUNCTION(name) Reflect::FunctionBuilder<decltype(REFLECT_FUNCTION_PTR(name)), REFLECT_FUNCTION_PTR(name)>(#name)
+#define REFLECT_FUNCTION(name) Reflect::FunctionBuilder<decltype(REFLECT_FUNCTION_PTR(name)), REFLECT_FUNCTION_PTR(name)>()
 #define REFLECT_METHOD_PTR(name) & ReflectClass::name
-#define REFLECT_METHOD(name) Reflect::FunctionBuilder<decltype(REFLECT_METHOD_PTR(name)), REFLECT_METHOD_PTR(name)>(#name)
+#define REFLECT_METHOD(name) Reflect::FunctionBuilder<decltype(REFLECT_METHOD_PTR(name)), REFLECT_METHOD_PTR(name)>()
 
 }

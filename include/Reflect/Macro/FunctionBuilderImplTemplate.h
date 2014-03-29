@@ -17,15 +17,11 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 
   static void call(CallerData data)
     {
-    typedef typename FunctionHelper::Class *Cls;
     typedef typename FunctionHelper::Arguments Args;
 
-    // Get this for the class
-    auto ths = InvHelper::template getThis<Cls>(data);
-
     // Call the function, unpacking arguments, collect the return.
-    auto result = FunctionHelper::template call<Fn>(
-      ths
+    auto result = FunctionHelper::template call<Fn, InvHelper>(
+      data
       REFLEX_TEMPLATE_UNPACK(UNPACK_HELPER)
       );
 
@@ -43,15 +39,11 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 
   static void call(CallerData data)
     {
-    typedef typename FunctionHelper::Class *Cls;
     typedef typename FunctionHelper::Arguments Args;
 
-    // Get this for the class
-    auto ths = InvHelper::template getThis<Cls>(data);
-
     // Call the function, unpacking arguments.
-    FunctionHelper::template call<Fn>(
-      ths
+    FunctionHelper::template call<Fn, InvHelper>(
+      data
       REFLEX_TEMPLATE_UNPACK(UNPACK_HELPER)
       );
     }
@@ -90,8 +82,11 @@ public:
   typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
   typedef Rt(Class::*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER));
 
-  template <Signature Fn> static ReturnType call(Class* cls REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
+  template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
+    // Get this for the class
+    auto cls = InvHelper::template getThis<Cls*>(data);
+
     return (cls->*Fn)(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
     }
   };
@@ -110,8 +105,11 @@ template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
   typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
   typedef Rt(Class::*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)) const;
 
-  template <Signature Fn> static ReturnType call(Class* cls REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
+  template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
+    // Get this for the class
+    auto cls = InvHelper::template getThis<Cls*>(data);
+
     return (cls->*Fn)(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
     }
   };
@@ -130,7 +128,7 @@ template <typename Rt REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
   typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
   typedef ReturnType (*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER));
 
-  template <Signature Fn> static ReturnType call(Class* REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
+  template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
     return Fn(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
     }

@@ -2,7 +2,9 @@
 #include "Reflect/EmbeddedTypes.h"
 #include "Reflect/MethodInjectorBuilder.h"
 #include "Reflect/FunctionBuilder.h"
+#include "../example/Default/Builder.h"
 #include <QtTest>
+#include <tuple>
 
 #define FLOAT_VAL 5.0f
 #define DOUBLE_VAL 5.0
@@ -71,18 +73,9 @@ template <> struct TypeResolver<A>
 }
 }
 
-class InvocationBuilder
+class InvocationBuilder : public Reflect::example::Builder
   {
 public:
-  class Arguments
-    {
-  public:
-    void **_args;
-    void *_this;
-    void *_result;
-    };
-  typedef Arguments *CallData;
-
   struct Result
     {
     typedef void (*Signature)(CallData);
@@ -92,65 +85,6 @@ public:
   template <typename Builder> static Result build()
     {
     Result r = { call<Builder> };
-    return r;
-    }
-
-  template <typename Builder> static void call(CallData data)
-    {
-    Builder::call(data);
-    }
-
-  template <typename T> static T getThis(CallData args)
-    {
-    return (T)args->_this;
-    }
-
-  template <std::size_t I, typename Arg>
-      static Arg unpackArgument(CallData args)
-    {
-    typedef typename std::remove_reference<Arg>::type NoRef;
-    return *(NoRef*)args->_args[I];
-    }
-
-  template <typename Return, typename T> static void packReturn(CallData data, T &&result)
-    {
-    *(Return*)data->_result = result;
-    }
-  };
-
-
-class MultiReturnInvocationBuilder : public InvocationBuilder
-  {
-public:
-  class Arguments : public InvocationBuilder::Arguments
-    {
-  public:
-    Arguments(void *ths)
-      {
-      _args = nullptr;
-      _this = ths;
-      resultIndex = 0;
-      }
-
-    QVariant results[3];
-    size_t resultIndex;
-    };
-  typedef Arguments *CallData;
-
-  struct Result
-    {
-    typedef void (*Signature)(CallData);
-    Signature fn;
-    };
-
-  template <typename Return, typename T> static void packReturn(CallData data, T &&result)
-    {
-    data->results[data->resultIndex++] = QVariant::fromValue(result);
-    }
-
-  template <typename Builder> static Result build()
-    {
-    Result r = { MultiReturnInvocationBuilder::call<Builder> };
     return r;
     }
 
@@ -210,8 +144,10 @@ void ReflectTest::functionWrapTest()
 
   auto inv1 = fn.buildInvocation<InvocationBuilder>();
 
-  void *args1[] = { (void*)&a, &b, &c };
-  InvocationBuilder::Arguments data1 = { args1, nullptr, nullptr };
+  Reflect::example::Object argVals[3];
+  Reflect::example::Object *args1[3];
+  Reflect::example::initArgs(argVals, args1, a, b, c);
+  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, std::vector<Reflect::example::Object>() };
 
   try
     {
@@ -232,8 +168,11 @@ void ReflectTest::methodInjectionTest()
 
   auto inv1 = fn.buildInvocation<MethodInjectorBuilder<InvocationBuilder>>();
 
-  void *args1[] = { &b, &c };
-  InvocationBuilder::Arguments data1 = { args1, nullptr, nullptr };
+  Reflect::example::Object argVals[2];
+  Reflect::example::Caster<int>::pack(&argVals[0], b);
+  Reflect::example::Caster<float>::pack(&argVals[1], c);
+  Reflect::example::Object *args1[3] = { &argVals[0], &argVals[1] };
+  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, std::vector<Reflect::example::Object>() };
 
   try
     {
@@ -267,19 +206,29 @@ void ReflectTest::functionInvokeTest()
   double *arg12 = &dbl;
   A* arg21 = &a;
   const float &arg31 = flt;
-  void *args1[] = { (void*)&arg11, &arg12 };
-  void *args2[] = { &arg21 };
-  void *args3[] = { (void*)&arg31 };
 
-  int result2;
-  A* result3;
+  Reflect::example::Object argVals1[2];
+  Reflect::example::Object *args1[2];
+  Reflect::example::initArgs(argVals1, args1, arg11, arg12);
+
+  Reflect::example::Object argVals2[1];
+  Reflect::example::Object *args2[1];
+  Reflect::example::initArgs(argVals2, args2, arg21);
+
+  Reflect::example::Object argVals3[1];
+  Reflect::example::Object *args3[1];
+  Reflect::example::initArgs(argVals3, args3, arg31);
 
   A ths;
   ths.pork = SELF_VAL;
 
-  InvocationBuilder::Arguments data1 = { args1, &ths, nullptr };
-  InvocationBuilder::Arguments data2 = { args2, &ths, &result2 };
-  InvocationBuilder::Arguments data3 = { args3, &ths, &result3 };
+  Reflect::example::Object thsVal;
+  Reflect::example::Object *thsValPtr;
+  Reflect::example::initArg(thsVal, thsValPtr, &ths);
+
+  InvocationBuilder::Arguments data1 = { args1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data2 = { args2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, std::vector<Reflect::example::Object>() };
 
   try
     {
@@ -287,12 +236,20 @@ void ReflectTest::functionInvokeTest()
     inv2.fn(&data2);
     inv3.fn(&data3);
     }
+  catch(const Crate::TypeException &t)
+    {
+    qDebug() << t.what();
+    QVERIFY(false);
+    }
   catch(...)
     {
+    QVERIFY(false);
     }
 
-  QCOMPARE(result2, INT_VAL);
-  QCOMPARE(result3->pork, SELF_VAL);
+  QVERIFY(data2.results.size() == 1);
+  QVERIFY(data3.results.size() == 1);
+  QCOMPARE(Reflect::example::Caster<int>::cast(&data2.results[0]), INT_VAL);
+  QCOMPARE(Reflect::example::Caster<A *>::cast(&data3.results[0])->pork, SELF_VAL);
   }
 
 void ReflectTest::multipleReturnTest()
@@ -303,10 +260,13 @@ void ReflectTest::multipleReturnTest()
 
   auto method = REFLECT_METHOD(multiReturn);
 
-  auto inv = method.buildInvocation<MultiReturnInvocationBuilder>();
+  auto inv = method.buildInvocation<InvocationBuilder>();
 
   A ths;
-  MultiReturnInvocationBuilder::Arguments data1(&ths);
+  Reflect::example::Object thsVal;
+  Reflect::example::Object *thsValPtr;
+  Reflect::example::initArg(thsVal, thsValPtr, &ths);
+  InvocationBuilder::Arguments data1 = { 0, 0, thsValPtr, std::vector<Reflect::example::Object>() };
 
   try
     {
@@ -316,13 +276,13 @@ void ReflectTest::multipleReturnTest()
     {
     }
 
-  QVERIFY(data1.resultIndex == 3);
-  QVERIFY(data1.results[0].type() == QVariant::Int);
-  QVERIFY(data1.results[1].type() == qMetaTypeId<float>());
-  QVERIFY(data1.results[2].type() == QVariant::Double);
-  QVERIFY(data1.results[0].toInt() == 5);
-  QVERIFY(data1.results[1].toFloat() == 6.4f);
-  QVERIFY(data1.results[2].toDouble() == 5.0);
+  QVERIFY(data1.results.size() == 3);
+  QVERIFY(data1.results[0].type == Reflect::findType<int>());
+  QVERIFY(data1.results[1].type == Reflect::findType<float>());
+  QVERIFY(data1.results[2].type == Reflect::findType<double>());
+  QVERIFY(data1.results[0].i == 5);
+  QVERIFY(data1.results[1].f == 6.4f);
+  QVERIFY(data1.results[2].db == 5.0);
   }
 
 QTEST_APPLESS_MAIN(ReflectTest)

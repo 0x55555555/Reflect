@@ -23,15 +23,11 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 
   template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
     {
-    typedef typename FunctionHelper::Class *Cls;
     typedef typename FunctionHelper::Arguments Args;
 
-    // Get this for the class
-    auto ths = InvHelper::template getThis<Cls>(data);
-
     // Call the function, unpacking arguments, collect the return.
-    auto result = FunctionHelper::template call<Fn>(
-      ths,
+    auto result = FunctionHelper::template call<Fn, InvHelper>(
+      data,
       InvHelper::template unpackArgument<Idx, typename std::tuple_element<Idx, Args>::type>(data)...
       );
 
@@ -48,15 +44,11 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 
   template <typename std::size_t... Idx> static void call(CallerData data, Indices<Idx...>)
     {
-    typedef typename FunctionHelper::Class *Cls;
     typedef typename FunctionHelper::Arguments Args;
 
-    // Get this for the class
-    auto ths = InvHelper::template getThis<Cls>(data);
-
     // Call the function, unpacking arguments.
-    FunctionHelper::template call<Fn>(
-      ths,
+    FunctionHelper::template call<Fn, InvHelper>(
+      data,
       InvHelper::template unpackArgument<Idx, typename std::tuple_element<Idx, Args>::type>(data)...
       );
     }
@@ -116,8 +108,11 @@ public:
   typedef std::tuple<Args...> Arguments;
   typedef Rt(Class::*Signature)(Args...);
 
-  template <Signature Fn> static ReturnType call(Class* cls, Args... args)
+  template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data, Args... args)
     {
+    // Get this for the class
+    auto cls = InvHelper::template getThis<Cls*>(data);
+
     return (cls->*Fn)(std::forward<Args>(args)...);
     }
   };
@@ -136,8 +131,11 @@ template <typename Rt, typename Cls, typename... Args>
   typedef std::tuple<Args...> Arguments;
   typedef Rt(Class::*Signature)(Args...) const;
 
-  template <Signature Fn> static ReturnType call(Class* cls, Args... args)
+  template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data, Args... args)
     {
+    // Get this for the class
+    auto cls = InvHelper::template getThis<Cls*>(data);
+
     return (cls->*Fn)(std::forward<Args>(args)...);
     }
   };
@@ -156,7 +154,7 @@ template <typename Rt, typename... Args>
   typedef std::tuple<Args...> Arguments;
   typedef ReturnType (*Signature)(Args...);
 
-  template <Signature Fn> static ReturnType call(Class*, Args... args)
+  template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData, Args... args)
     {
     return Fn(std::forward<Args>(args)...);
     }
