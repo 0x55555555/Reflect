@@ -123,8 +123,15 @@ public:
 
   static void pack(Boxer *, Object *o, T t)
     {
+    union
+    {
+        void *in;
+        T *out;
+    } conv;
+
     o->type = Reflect::findType<T>();
-    *reinterpret_cast<T*>(&o->d) = t;
+    conv.in = &o->d;
+    *conv.out = t;
     }
   };
 
