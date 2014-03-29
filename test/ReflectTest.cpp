@@ -78,7 +78,7 @@ class InvocationBuilder : public Reflect::example::Builder
 public:
   struct Result
     {
-    typedef void (*Signature)(CallData);
+    typedef void (*Signature)(Reflect::example::Boxer *, Arguments *);
     Signature fn;
     };
 
@@ -88,9 +88,10 @@ public:
     return r;
     }
 
-  template <typename Builder> static void call(CallData data)
+  template <typename Builder> static void call(Reflect::example::Boxer *b, Arguments *data)
     {
-    Builder::call(data);
+    Call call = { data, b };
+    Builder::call(&call);
     }
   };
 
@@ -149,11 +150,11 @@ void ReflectTest::functionWrapTest()
   Reflect::example::Object argVals[3];
   Reflect::example::Object *args1[3];
   Reflect::example::initArgs(&boxer, argVals, args1, a, b, c);
-  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, &boxer, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, std::vector<Reflect::example::Object>() };
 
   try
     {
-    inv1.fn(&data1);
+    inv1.fn(&boxer, &data1);
     }
   catch(...)
     {
@@ -180,11 +181,11 @@ void ReflectTest::methodInjectionTest()
   Reflect::example::Caster<int>::pack(&boxer, &argVals[0], b);
   Reflect::example::Caster<float>::pack(&boxer, &argVals[1], c);
   Reflect::example::Object *args1[3] = { &argVals[0], &argVals[1] };
-  InvocationBuilder::Arguments data1 = { args1, 3, &thsVal, &boxer, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1 = { args1, 3, &thsVal, std::vector<Reflect::example::Object>() };
 
   try
     {
-    inv1.fn(&data1);
+    inv1.fn(&boxer, &data1);
     }
   catch(...)
     {
@@ -236,15 +237,15 @@ void ReflectTest::functionInvokeTest()
   Reflect::example::Object *thsValPtr;
   Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
 
-  InvocationBuilder::Arguments data1 = { args1, 2, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
-  InvocationBuilder::Arguments data2 = { args2, 1, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
-  InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1 = { args1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data2 = { args2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, std::vector<Reflect::example::Object>() };
 
   try
     {
-    inv1.fn(&data1);
-    inv2.fn(&data2);
-    inv3.fn(&data3);
+    inv1.fn(&boxer, &data1);
+    inv2.fn(&boxer, &data2);
+    inv3.fn(&boxer, &data3);
     }
   catch(const Crate::TypeException &t)
     {
@@ -278,11 +279,11 @@ void ReflectTest::multipleReturnTest()
   Reflect::example::Object thsVal;
   Reflect::example::Object *thsValPtr;
   Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
-  InvocationBuilder::Arguments data1 = { 0, 0, thsValPtr, &boxer, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1 = { 0, 0, thsValPtr, std::vector<Reflect::example::Object>() };
 
   try
     {
-    inv.fn(&data1);
+    inv.fn(&boxer, &data1);
     }
   catch(...)
     {
