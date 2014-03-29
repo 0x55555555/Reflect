@@ -2,6 +2,7 @@
 #include "Crate/TypeException.h"
 #include "Crate/Traits.h"
 #include <vector>
+#include <memory>
 #include <cassert>
 
 namespace Reflect
