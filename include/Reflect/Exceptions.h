@@ -22,6 +22,9 @@ public:
     m_error = "Expected " + std::to_string(m_expected) + " argments,  got " + std::to_string(m_actual) + "";
     }
 
+  ~ArgCountException() throw()
+    {
+    }
 
   const char* what() const throw()
     {

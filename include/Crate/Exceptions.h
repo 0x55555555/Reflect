@@ -16,6 +16,10 @@ public:
     m_error = "Expected '" + m_expected->name() + "' got '" + m_actual->name() + "'";
     }
 
+  ~TypeException() throw()
+    {
+    }
+
   const char* what() const throw()
     {
     return m_error.c_str();
@@ -40,6 +44,10 @@ public:
     {
     m_error = "Expected '" + expected()->name() + "' got '" + actual()->name() + "' for 'this' parameter.";
     }
+
+  ~ThisException() throw()
+    {
+    }
   };
 
 class ArgException : public TypeException
@@ -50,6 +58,10 @@ public:
         m_index(index)
     {
     m_error = "Expected '" + expected()->name() + "' got '" + actual()->name() + "' for argument " + std::to_string(index) + " parameter.";
+    }
+
+  ~ArgException() throw()
+    {
     }
 
   std::size_t index() const { return m_index; }
