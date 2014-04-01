@@ -7,6 +7,14 @@ namespace Reflect
 namespace detail
 {
 
+template <typename InvHelper> class CanCallHelper
+  {
+public:
+  bool tupleEach(CallerData data, Indices<Idx...>)
+    {
+    }
+  };
+
 /// \brief Holder for the indices
 template <std::size_t... Is> struct Indices { };
 /// \brief Build indices for a given size N.
@@ -78,6 +86,16 @@ template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper
 
     // call the function.
     Dispatch::call(data, IndicesForFunction());
+    }
+
+  static bool canCall(CallerData data)
+    {
+    typedef typename FunctionHelper::Arguments Args;
+
+    tupleEach<Args, CanCallHelper>(data);
+
+    // Call the function, unpacking arguments.
+    return FunctionHelper::template canCall<Fn, InvHelper>(data);
     }
   };
 

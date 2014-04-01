@@ -42,6 +42,10 @@ public:
     return &a;
     }
 
+  void pork4(A *, float )
+    {
+    }
+
   std::tuple<int, float, double> multiReturn()
     {
     return std::make_tuple(5, 6.4f, 5.0);
@@ -301,6 +305,16 @@ void ReflectTest::multipleReturnTest()
   QVERIFY(data1.results[0].i == 5);
   QVERIFY(data1.results[1].f == 6.4f);
   QVERIFY(data1.results[2].db == 5.0);
+  }
+
+void ReflectTest::overloadingTest()
+  {
+  typedef Reflect::FunctionBuilder<decltype(&A::pork1), &A::pork1> Method1; // 2 args
+  typedef Reflect::FunctionBuilder<decltype(&A::pork2), &A::pork2> Method2; // 1 arg
+  typedef Reflect::FunctionBuilder<decltype(&A::pork3), &A::pork3> Method3; // 1 arg
+  typedef Reflect::FunctionBuilder<decltype(&A::pork4), &A::pork4> Method4; // 2 args
+
+
   }
 
 QTEST_APPLESS_MAIN(ReflectTest)

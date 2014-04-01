@@ -59,4 +59,5 @@ HEADERS += \
     ../include/Reflect/MethodInjectorBuilder.h \
     ../include/Reflect/ReturnPacker.h \
     ../include/Crate/DerivedTraits.h \
-    ../example/Default/Builder.h
+    ../example/Default/Builder.h \
+    ../include/Reflect/TupleVisitor.h
