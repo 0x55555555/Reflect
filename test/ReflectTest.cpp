@@ -90,6 +90,11 @@ public:
     typedef void (*Signature)(Reflect::example::Boxer *, Arguments *);
     Signature fn;
     };
+  struct CanCallResult
+    {
+    typedef bool (*Signature)(Reflect::example::Boxer *, Arguments *);
+    Signature fn;
+    };
 
   template <typename Builder> static Result build()
     {
@@ -97,10 +102,22 @@ public:
     return r;
     }
 
+  template <typename Builder> static CanCallResult buildCanCall()
+    {
+    CanCallResult r = { canCall<Builder> };
+    return r;
+    }
+
   template <typename Builder> static void call(Reflect::example::Boxer *b, Arguments *data)
     {
     Call call = { data, b };
     Builder::call(&call);
+    }
+
+  template <typename Builder> static bool canCall(Reflect::example::Boxer *b, Arguments *data)
+    {
+    Call call = { data, b };
+    return Builder::canCall(&call);
     }
   };
 
@@ -307,6 +324,16 @@ void ReflectTest::multipleReturnTest()
   QVERIFY(data1.results[2].db == 5.0);
   }
 
+template <typename Builder> class CanCallTestHelper
+  {
+public:
+  template <typename T> static bool canCall(Reflect::example::Boxer *b, typename T::Arguments data)
+    {
+    auto result = Builder().template buildCanCall<T>();
+    return result.fn(b, &data);
+    }
+  };
+
 void ReflectTest::overloadingTest()
   {
   typedef Reflect::FunctionBuilder<decltype(&A::pork1), &A::pork1> Method1; // 2 args
@@ -314,7 +341,54 @@ void ReflectTest::overloadingTest()
   typedef Reflect::FunctionBuilder<decltype(&A::pork3), &A::pork3> Method3; // 1 arg
   typedef Reflect::FunctionBuilder<decltype(&A::pork4), &A::pork4> Method4; // 2 args
 
+  Reflect::example::Boxer boxer;
 
+  A a;
+
+  A ths;
+  Reflect::example::Object thsVal;
+  Reflect::example::Object *thsValPtr;
+  Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
+
+  Reflect::example::Object argVals1[2];
+  Reflect::example::Object *argsP1[2];
+  Reflect::example::initArgs(&boxer, argVals1, argsP1, 5.0f, 4.0);
+  InvocationBuilder::Arguments args1 = { argsP1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+
+  Reflect::example::Object argVals2[1];
+  Reflect::example::Object *argsP2[1];
+  Reflect::example::initArgs(&boxer, argVals2, argsP2, &a);
+  InvocationBuilder::Arguments args2 = { argsP2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+
+  Reflect::example::Object argVals3[1];
+  Reflect::example::Object *argsP3[1];
+  Reflect::example::initArgs(&boxer, argVals3, argsP3, 5.0f);
+  InvocationBuilder::Arguments args3 = { argsP3, 1, nullptr, std::vector<Reflect::example::Object>() };
+
+  Reflect::example::Object argVals4[2];
+  Reflect::example::Object *argsP4[2];
+  Reflect::example::initArgs(&boxer, argVals4, argsP4, &a, 5.0f);
+  InvocationBuilder::Arguments args4 = { argsP4, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+
+  QVERIFY(CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args1));
+  QVERIFY(!CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args1));
+  QVERIFY(CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args1));
+  QVERIFY(!CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args1));
+
+  QVERIFY(!CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args2));
+  QVERIFY(CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args2));
+  QVERIFY(!CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args2));
+  QVERIFY(!CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args2));
+
+  QVERIFY(!CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args3));
+  QVERIFY(!CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args3));
+  QVERIFY(CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args3));
+  QVERIFY(!CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args3));
+
+  QVERIFY(!CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args4));
+  QVERIFY(CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args4));
+  QVERIFY(!CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args4));
+  QVERIFY(CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args4));
   }
 
 QTEST_APPLESS_MAIN(ReflectTest)

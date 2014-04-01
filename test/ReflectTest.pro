@@ -21,7 +21,7 @@ SOURCES += ReflectTest.cpp \
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-#DEFINES += REFLECT_MACRO_IMPL
+DEFINES += REFLECT_MACRO_IMPL
 
 win32-msvc2012 {
   # needs enabling for msvc2013, which has no mkspec yet...
@@ -50,7 +50,6 @@ HEADERS += \
     ../include/Reflect/Cpp11/FunctionBuilderImpl.h \
     ../include/Reflect/Macro/FunctionBuilderImpl.h \
     ../include/Reflect/Macro/FunctionBuilderImplTemplate.h \
-    ../include/Crate/TypeException.h \
     ../include/Crate/BaseTraits.h \
     ../include/Crate/CopyTraits.h \
     ../include/Crate/ReferenceTraits.h \
@@ -60,4 +59,7 @@ HEADERS += \
     ../include/Reflect/ReturnPacker.h \
     ../include/Crate/DerivedTraits.h \
     ../example/Default/Builder.h \
-    ../include/Reflect/TupleVisitor.h
+    ../include/Reflect/TupleEach.h \
+    ../include/Reflect/CanCallHelper.h \
+    ../include/Crate/Exceptions.h \
+    ../include/Reflect/Exceptions.h

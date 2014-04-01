@@ -1,19 +1,13 @@
 #pragma once
 #include <tuple>
+#include "Reflect/Exceptions.h"
 #include "Reflect/ReturnPacker.h"
+#include "Reflect/CanCallHelper.h"
 
 namespace Reflect
 {
 namespace detail
 {
-
-template <typename InvHelper> class CanCallHelper
-  {
-public:
-  bool tupleEach(CallerData data, Indices<Idx...>)
-    {
-    }
-  };
 
 /// \brief Holder for the indices
 template <std::size_t... Is> struct Indices { };
@@ -84,18 +78,21 @@ template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper
     // The correct dispatcher - based on the ReturnType.
     typedef ReturnDispatch<InvHelper, FunctionHelper, Fn, typename FunctionHelper::ReturnType> Dispatch;
 
+    if (InvHelper::getArgumentCount(data) < std::tuple_size<typename FunctionHelper::Arguments>::value)
+      {
+      throw ArgCountException(
+        std::tuple_size<typename FunctionHelper::Arguments>::value,
+        InvHelper::getArgumentCount(data));
+      }
+
     // call the function.
     Dispatch::call(data, IndicesForFunction());
     }
 
   static bool canCall(CallerData data)
     {
-    typedef typename FunctionHelper::Arguments Args;
-
-    tupleEach<Args, CanCallHelper>(data);
-
-    // Call the function, unpacking arguments.
-    return FunctionHelper::template canCall<Fn, InvHelper>(data);
+    return detail::CanCallHelper<InvHelper>::template canCast<typename FunctionHelper::Arguments>(data) &&
+        FunctionHelper::template canCastThis<InvHelper>(data);
     }
   };
 
@@ -129,9 +126,14 @@ public:
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data, Args... args)
     {
     // Get this for the class
-    auto cls = InvHelper::template getThis<Cls*>(data);
+    auto cls = InvHelper::template unpackThis<Cls*>(data);
 
     return (cls->*Fn)(std::forward<Args>(args)...);
+    }
+
+  template <typename InvHelper> static bool canCastThis(typename InvHelper::CallData data)
+    {
+    return detail::CanCallHelper<InvHelper>::template canCastThis<Cls*>(data);
     }
   };
 
@@ -152,9 +154,14 @@ template <typename Rt, typename Cls, typename... Args>
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data, Args... args)
     {
     // Get this for the class
-    auto cls = InvHelper::template getThis<Cls*>(data);
+    auto cls = InvHelper::template unpackThis<Cls*>(data);
 
     return (cls->*Fn)(std::forward<Args>(args)...);
+    }
+
+  template <typename InvHelper> static bool canCastThis(typename InvHelper::CallData data)
+    {
+    return detail::CanCallHelper<InvHelper>::template canCastThis<Cls*>(data);
     }
   };
 
@@ -175,6 +182,11 @@ template <typename Rt, typename... Args>
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData, Args... args)
     {
     return Fn(std::forward<Args>(args)...);
+    }
+
+  template <typename InvHelper> static bool canCastThis(typename InvHelper::CallData)
+    {
+    return true;
     }
   };
 

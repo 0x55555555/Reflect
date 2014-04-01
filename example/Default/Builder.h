@@ -1,9 +1,10 @@
 #pragma once
-#include "Crate/TypeException.h"
+#include "Crate/Exceptions.h"
 #include "Crate/Traits.h"
 #include <vector>
 #include <memory>
 #include <cassert>
+#include "QDebug"
 
 namespace Reflect
 {
@@ -177,7 +178,7 @@ public:
   typedef T *Result;
   typedef Crate::Traits<T> ClassTraits;
 
-  static bool canCast(Boxer *boxer, const Object *o)
+  static bool canCast(Boxer *boxer, Object *o)
     {
     return o && ClassTraits::canUnbox(boxer, o);
     }
@@ -272,7 +273,12 @@ public:
     };
   typedef Call *CallData;
 
-  template <typename T> static T getThis(CallData args)
+  static std::size_t getArgumentCount(CallData args)
+    {
+    return args->args->argCount;
+    }
+
+  template <typename T> static T unpackThis(CallData args)
     {
     try
       {
@@ -282,6 +288,11 @@ public:
       {
       throw Crate::ThisException(type);
       }
+    }
+
+  template <typename T> static bool canUnpackThis(CallData args)
+    {
+    return Caster<T>::canCast(args->boxer, args->args->ths);
     }
 
   template <std::size_t I, typename Arg>
@@ -295,6 +306,12 @@ public:
       {
       throw Crate::ArgException(type, I);
       }
+    }
+
+  template <std::size_t I, typename Arg>
+      static bool canUnpackArgument(CallData data)
+    {
+    return Caster<Arg>::canCast(data->boxer, data->args->args[I]);
     }
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)

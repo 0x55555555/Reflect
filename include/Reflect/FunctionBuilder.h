@@ -46,6 +46,12 @@ public:
     typedef detail::CallHelper<T, Helper, Fn> Builder;
     return T::template build<Builder>();
     }
+
+  template <typename T> typename T::CanCallResult buildCanCall() const
+    {
+    typedef detail::CallHelper<T, Helper, Fn> Builder;
+    return T::template buildCanCall<Builder>();
+    }
   };
 
 #define REFLECT_FUNCTION_HELPER(cls) typedef cls ReflectClass

@@ -1,6 +1,8 @@
 #pragma once
 #include <tuple>
 #include "Reflect/ReturnPacker.h"
+#include "Reflect/CanCallHelper.h"
+#include "Reflect/Exceptions.h"
 
 namespace Reflect
 {
@@ -71,8 +73,21 @@ template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper
       Fn,
       typename FunctionHelper::ReturnType> CallDispatch;
 
+    if (InvHelper::getArgumentCount(data) < std::tuple_size<typename FunctionHelper::Arguments>::value)
+      {
+      throw ArgCountException(
+        std::tuple_size<typename FunctionHelper::Arguments>::value,
+        InvHelper::getArgumentCount(data));
+      }
+
     // call the function.
     CallDispatch::call(data);
+    }
+
+  static bool canCall(CallerData data)
+    {
+    return detail::CanCallHelper<InvHelper>::template canCast<typename FunctionHelper::Arguments>(data) &&
+        FunctionHelper::template canCastThis<InvHelper>(data);
     }
   };
 

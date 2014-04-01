@@ -1,5 +1,6 @@
 #pragma once
 #include <tuple>
+#include "TupleEach.h"
 
 namespace Reflect
 {
@@ -16,26 +17,25 @@ public:
   };
 
 
-template <size_t Remaining, typename T, typename InvHelper> class TuplePacker
+template <typename Tuple, typename InvHelper> class TuplePackerHelper
   {
 public:
-  static void pack(typename InvHelper::CallData d, T &&tup)
-    {
-    TuplePacker<Remaining-1, T, InvHelper>::pack(d, std::move(tup));
-
-    typedef std::integral_constant<size_t, Remaining-1> Index;
-    typedef typename std::tuple_element<Index::value, T>::type ElementType;
-
-    ReturnPacker<ElementType, InvHelper>::pack(d, std::move(std::get<Index::value>(tup)));
-    }
-  };
-
-template <typename T, typename InvHelper> class TuplePacker<0, T, InvHelper>
-  {
-public:
-  static void pack(typename InvHelper::CallData, T &&)
+  TuplePackerHelper(Tuple& tup, typename InvHelper::CallData &d)
+      : m_tuple(tup),
+        m_data(d)
     {
     }
+
+  template <std::size_t I> void visit()
+    {
+    typedef typename std::tuple_element<I, Tuple>::type ElementType;
+
+    ReturnPacker<ElementType, InvHelper>::pack(m_data, std::move(std::get<I>(m_tuple)));
+    }
+
+private:
+  Tuple &m_tuple;
+  typename InvHelper::CallData &m_data;
   };
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
@@ -47,7 +47,7 @@ public:
 
   static void pack(typename InvHelper::CallData data, Tuple &&result)
     {
-    TuplePacker<std::tuple_size<Tuple>::value, Tuple, InvHelper>::pack(data, std::move(result));
+    tupleEach<TuplePackerHelper>(TuplePackerHelper<Tuple, InvHelper>(&result, data));
     }
   };
 
@@ -59,7 +59,8 @@ public:
   typedef std::tuple<Args...> Tuple;
   static void pack(typename InvHelper::CallData data, std::tuple<Args...> &&result)
     {
-    TuplePacker<std::tuple_size<Tuple>::value, Tuple, InvHelper>::pack(data, std::move(result));
+    TuplePackerHelper<Tuple, InvHelper> helper(result, data);
+    tupleEach<Tuple>(helper);
     }
   };
 

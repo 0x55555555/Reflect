@@ -1,6 +1,6 @@
 #pragma once
 #include <type_traits>
-#include "Crate/TypeException.h"
+#include "Crate/Exceptions.h"
 
 namespace Crate
 {

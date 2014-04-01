@@ -1,12 +1,12 @@
 #pragma once
-#include <stdexcept>
+#include "Reflect/Exceptions.h"
 #include "Reflect/Type.h"
 #include "Reflect/EmbeddedTypes.h"
 
 namespace Crate
 {
 
-class TypeException : public std::exception
+class TypeException : public Reflect::CallException
   {
 public:
   TypeException(const Reflect::Type *expected, const Reflect::Type *actual)
@@ -14,10 +14,6 @@ public:
         m_actual(actual ? actual : Reflect::findType<void>())
     {
     m_error = "Expected '" + m_expected->name() + "' got '" + m_actual->name() + "'";
-    }
-
-  ~TypeException() throw()
-    {
     }
 
   const char* what() const throw()

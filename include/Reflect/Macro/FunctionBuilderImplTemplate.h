@@ -85,9 +85,14 @@ public:
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
     // Get this for the class
-    auto cls = InvHelper::template getThis<Cls*>(data);
+    auto cls = InvHelper::template unpackThis<Cls*>(data);
 
     return (cls->*Fn)(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
+    }
+
+  template <typename InvHelper> static bool canCastThis(typename InvHelper::CallData data)
+    {
+    return detail::CanCallHelper<InvHelper>::template canCastThis<Cls*>(data);
     }
   };
 
@@ -108,9 +113,14 @@ template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
     // Get this for the class
-    auto cls = InvHelper::template getThis<Cls*>(data);
+    auto cls = InvHelper::template unpackThis<Cls*>(data);
 
     return (cls->*Fn)(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
+    }
+
+  template <typename InvHelper> static bool canCastThis(typename InvHelper::CallData data)
+    {
+    return detail::CanCallHelper<InvHelper>::template canCastThis<Cls*>(data);
     }
   };
 
@@ -131,6 +141,11 @@ template <typename Rt REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
     {
     return Fn(REFLEX_TEMPLATE_UNPACK_COMMA(PARAM_FORWARD_HELPER));
+    }
+
+  template <typename InvHelper> static bool canCastThis(typename InvHelper::CallData)
+    {
+    return true;
     }
   };
 
