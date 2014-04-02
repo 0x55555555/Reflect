@@ -10,21 +10,21 @@ namespace detail
 template <std::size_t Remaining, typename Visitor> class TupleVisitor
   {
 public:
-  static void visit(Visitor &d)
+  static bool visit(Visitor &d)
     {
-    TupleVisitor<Remaining-1, Visitor>::visit(d);
-
     typedef std::integral_constant<size_t, Remaining-1> Index;
 
-    d.template visit<Index::value>();
+    return TupleVisitor<Remaining-1, Visitor>::visit(d) ||
+        d.template visit<Index::value>();
     }
   };
 
 template <typename Visitor> class TupleVisitor<0, Visitor>
   {
 public:
-  static void visit(Visitor &)
+  static bool visit(Visitor &)
     {
+    return false;
     }
   };
 

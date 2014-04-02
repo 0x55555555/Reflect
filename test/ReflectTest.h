@@ -24,5 +24,6 @@ private Q_SLOTS:
   void copyableTyperTest();
   void nonCopyableTyperTest();
   void nonCopyableNonCleanedTyperTest();
+  void canCallTest();
   void overloadingTest();
   };

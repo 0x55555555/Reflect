@@ -25,13 +25,13 @@ public:
   typedef typename Helper::Arguments Arguments;
 
   /// \brief Find the type of the return value of the function.
-  const Type *returnType() { return findType<ReturnType>(); }
+  static const Type *returnType() { return findType<ReturnType>(); }
 
   /// \brief The number of arguments to be passed to the function
-  size_t argumentCount() { return std::tuple_size<Arguments>::value; }
+  static size_t argumentCount() { return std::tuple_size<Arguments>::value; }
 
   /// \brief The type of the argument at N.
-  template <size_t N> const Type *argumentType()
+  template <size_t N> static const Type *argumentType()
     {
     typedef typename std::tuple_element<N, Arguments>::type Type;
     return findType<Type>();
@@ -41,16 +41,29 @@ public:
   ///        Builder must be a class containing required functions
   ///        to build calls.
   /// \sa    BasicBuilder.h
-  template <typename T> typename T::Result buildInvocation() const
+  template <typename T> static typename T::Result buildCall()
     {
     typedef detail::CallHelper<T, Helper, Fn> Builder;
     return T::template build<Builder>();
     }
 
-  template <typename T> typename T::CanCallResult buildCanCall() const
+  template <typename T> static typename T::CanCallResult buildCanCall()
     {
     typedef detail::CallHelper<T, Helper, Fn> Builder;
     return T::template buildCanCall<Builder>();
+    }
+
+  /// \brief Call this function, passing the given argument data.
+  template <typename T> static void call(typename T::CallData data)
+    {
+    typedef detail::CallHelper<T, Helper, Fn> Builder;
+    return Builder::call(data);
+    }
+
+  template <typename T> static bool canCall(typename T::CallData data)
+    {
+    typedef detail::CallHelper<T, Helper, Fn> Builder;
+    return Builder::canCall(data);
     }
   };
 

@@ -2,6 +2,7 @@
 #include "Reflect/EmbeddedTypes.h"
 #include "Reflect/MethodInjectorBuilder.h"
 #include "Reflect/FunctionBuilder.h"
+#include "Reflect/FunctionSelector.h"
 #include "../example/Default/Builder.h"
 #include <QtTest>
 #include <tuple>
@@ -169,7 +170,7 @@ void ReflectTest::functionWrapTest()
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = fn.buildInvocation<InvocationBuilder>();
+  auto inv1 = fn.buildCall<InvocationBuilder>();
 
   Reflect::example::Boxer boxer;
 
@@ -195,7 +196,7 @@ void ReflectTest::methodInjectionTest()
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = fn.buildInvocation<MethodInjectorBuilder<InvocationBuilder>>();
+  auto inv1 = fn.buildCall<MethodInjectorBuilder<InvocationBuilder>>();
 
   Reflect::example::Boxer boxer;
 
@@ -227,9 +228,9 @@ void ReflectTest::functionInvokeTest()
   auto method2 = REFLECT_METHOD(pork2);
   auto method3 = REFLECT_METHOD(pork3);
 
-  auto inv1 = method1.buildInvocation<InvocationBuilder>();
-  auto inv2 = method2.buildInvocation<InvocationBuilder>();
-  auto inv3 = method3.buildInvocation<InvocationBuilder>();
+  auto inv1 = method1.buildCall<InvocationBuilder>();
+  auto inv2 = method2.buildCall<InvocationBuilder>();
+  auto inv3 = method3.buildCall<InvocationBuilder>();
 
   A a;
   a.pork = SELF_VAL;
@@ -297,7 +298,7 @@ void ReflectTest::multipleReturnTest()
 
   auto method = REFLECT_METHOD(multiReturn);
 
-  auto inv = method.buildInvocation<InvocationBuilder>();
+  auto inv = method.buildCall<InvocationBuilder>();
 
   Reflect::example::Boxer boxer;
 
@@ -334,7 +335,7 @@ public:
     }
   };
 
-void ReflectTest::overloadingTest()
+void ReflectTest::canCallTest()
   {
   typedef Reflect::FunctionBuilder<decltype(&A::pork1), &A::pork1> Method1; // 2 args
   typedef Reflect::FunctionBuilder<decltype(&A::pork2), &A::pork2> Method2; // 1 arg
@@ -389,6 +390,56 @@ void ReflectTest::overloadingTest()
   QVERIFY(CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args4));
   QVERIFY(!CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args4));
   QVERIFY(CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args4));
+  }
+
+void ReflectTest::overloadingTest()
+  {
+  typedef Reflect::FunctionBuilder<decltype(&A::pork1), &A::pork1> Method1; // 2 args
+  typedef Reflect::FunctionBuilder<decltype(&A::pork2), &A::pork2> Method2; // 1 arg
+  typedef Reflect::FunctionBuilder<decltype(&A::pork3), &A::pork3> Method3; // 1 arg
+  typedef Reflect::FunctionBuilder<decltype(&A::pork4), &A::pork4> Method4; // 2 args
+
+  Reflect::example::Boxer boxer;
+
+  A a;
+
+  A ths;
+  Reflect::example::Object thsVal;
+  Reflect::example::Object *thsValPtr;
+  Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
+
+  Reflect::example::Object argVals1[2];
+  Reflect::example::Object *argsP1[2];
+  Reflect::example::initArgs(&boxer, argVals1, argsP1, 5.0f, 4.0);
+  InvocationBuilder::Arguments args1 = { argsP1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+
+  Reflect::example::Object argVals2[1];
+  Reflect::example::Object *argsP2[1];
+  Reflect::example::initArgs(&boxer, argVals2, argsP2, &a);
+  InvocationBuilder::Arguments args2 = { argsP2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+
+  Reflect::example::Object argVals3[1];
+  Reflect::example::Object *argsP3[1];
+  Reflect::example::initArgs(&boxer, argVals3, argsP3, 5.0f);
+  InvocationBuilder::Arguments args3 = { argsP3, 1, nullptr, std::vector<Reflect::example::Object>() };
+
+  Reflect::example::Object argVals4[2];
+  Reflect::example::Object *argsP4[2];
+  Reflect::example::initArgs(&boxer, argVals4, argsP4, &a, 5.0f);
+  InvocationBuilder::Arguments args4 = { argsP4, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+
+  typedef Reflect::FunctionSelector<InvocationBuilder, Method1, Method4> Overload1; // 2 args
+  typedef Reflect::FunctionSelector<InvocationBuilder, Method2, Method3> Overload2; // 1 arg
+
+  QVERIFY(InvocationBuilder::canCall<Overload1>(&boxer, &args1));
+  QVERIFY(!InvocationBuilder::canCall<Overload1>(&boxer, &args2));
+  QVERIFY(!InvocationBuilder::canCall<Overload1>(&boxer, &args3));
+  QVERIFY(InvocationBuilder::canCall<Overload1>(&boxer, &args4));
+
+  QVERIFY(InvocationBuilder::canCall<Overload2>(&boxer, &args1));
+  QVERIFY(InvocationBuilder::canCall<Overload2>(&boxer, &args2));
+  QVERIFY(InvocationBuilder::canCall<Overload2>(&boxer, &args3));
+  QVERIFY(InvocationBuilder::canCall<Overload2>(&boxer, &args4));
   }
 
 QTEST_APPLESS_MAIN(ReflectTest)

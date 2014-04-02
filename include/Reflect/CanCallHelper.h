@@ -16,11 +16,12 @@ public:
     {
     }
 
-  template <std::size_t Idx> void visit()
+  template <std::size_t Idx> bool visit()
     {
     typedef typename std::tuple_element<Idx, Tuple>::type ElementType;
 
-    m_result = m_result && InvHelper::template canUnpackArgument<Idx, ElementType>(m_data);
+    m_result = InvHelper::template canUnpackArgument<Idx, ElementType>(m_data);
+    return !m_result;
     }
 
   typename InvHelper::CallData &m_data;

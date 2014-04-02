@@ -26,11 +26,12 @@ public:
     {
     }
 
-  template <std::size_t I> void visit()
+  template <std::size_t I> bool visit()
     {
     typedef typename std::tuple_element<I, Tuple>::type ElementType;
 
     ReturnPacker<ElementType, InvHelper>::pack(m_data, std::move(std::get<I>(m_tuple)));
+    return false;
     }
 
 private:
