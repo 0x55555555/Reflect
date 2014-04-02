@@ -32,6 +32,7 @@ public:
     {
     return m_expected == e.m_expected && m_actual == e.m_actual;
     }
+
 protected:
   std::string m_error;
 
@@ -69,6 +70,11 @@ public:
     }
 
   std::size_t index() const { return m_index; }
+
+  bool operator==(const ArgException &e) const
+    {
+    return TypeException::operator==(e) && m_index == e.m_index;
+    }
 
 private:
   std::size_t m_index;

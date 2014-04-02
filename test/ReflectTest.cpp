@@ -303,7 +303,9 @@ void ReflectTest::functionInvokeTest()
     {
     inv2.fn(&boxer, &data1);
     };
-  VERIFY_THROWS(inv2WithArg1, const Crate::TypeException &, Crate::TypeException(Reflect::findType<A>(), Reflect::findType<float>()));
+  VERIFY_THROWS(inv2WithArg1,
+    const Crate::ArgException &,
+    Crate::ArgException(Crate::TypeException(Reflect::findType<A>(), Reflect::findType<float>()), 0));
 
   auto inv2WithNoThis = [&]()
     {
