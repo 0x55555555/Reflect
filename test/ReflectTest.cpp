@@ -20,6 +20,10 @@
   QVERIFY2(thrown, "Nothing was thrown"); \
   }
 
+#define VERIFY_NO_THROWS(lambda) \
+  try{ lambda(); } \
+  catch(...) { QVERIFY2(false, "invalid exception type thrown"); }
+
 #define QCOMPARE_NO_RETURN(actual, expected) \
 do {\
     if (!QTest::qCompare(actual, expected, #actual, #expected, __FILE__, __LINE__))\
@@ -187,13 +191,7 @@ void ReflectTest::functionWrapTest()
   Reflect::example::initArgs(&boxer, argVals, args1, a, b, c);
   InvocationBuilder::Arguments data1 = { args1, 3, nullptr, std::vector<Reflect::example::Object>() };
 
-  try
-    {
-    inv1.fn(&boxer, &data1);
-    }
-  catch(...)
-    {
-    }
+  VERIFY_NO_THROWS([&]() { inv1.fn(&boxer, &data1); });
   }
 
 void ReflectTest::methodInjectionTest()
@@ -213,18 +211,11 @@ void ReflectTest::methodInjectionTest()
   Reflect::example::initArg(&boxer, thsVal, thsValPtr, A());
 
   Reflect::example::Object argVals[2];
-  Reflect::example::Caster<int>::pack(&boxer, &argVals[0], b);
-  Reflect::example::Caster<float>::pack(&boxer, &argVals[1], c);
-  Reflect::example::Object *args1[3] = { &argVals[0], &argVals[1] };
-  InvocationBuilder::Arguments data1 = { args1, 3, &thsVal, std::vector<Reflect::example::Object>() };
+  Reflect::example::Object *args1[2];
+  Reflect::example::initArgs(&boxer, argVals, args1, b, c);
+  InvocationBuilder::Arguments data1 = { args1, 2, &thsVal, std::vector<Reflect::example::Object>() };
 
-  try
-    {
-    inv1.fn(&boxer, &data1);
-    }
-  catch(...)
-    {
-    }
+  VERIFY_NO_THROWS([&]() { inv1.fn(&boxer, &data1); });
   }
 
 void ReflectTest::functionInvokeTest()
@@ -277,21 +268,11 @@ void ReflectTest::functionInvokeTest()
   InvocationBuilder::Arguments data2_1 = { args2, 1, 0, std::vector<Reflect::example::Object>() };
   InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, std::vector<Reflect::example::Object>() };
 
-  try
-    {
+  VERIFY_NO_THROWS([&]() {
     inv1.fn(&boxer, &data1);
     inv2.fn(&boxer, &data2);
     inv3.fn(&boxer, &data3);
-    }
-  catch(const Crate::TypeException &t)
-    {
-    qDebug() << t.what();
-    QVERIFY(false);
-    }
-  catch(...)
-    {
-    QVERIFY(false);
-    }
+    });
 
   auto inv1WithArg2 = [&]()
     {
@@ -339,13 +320,7 @@ void ReflectTest::multipleReturnTest()
   Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
   InvocationBuilder::Arguments data1 = { 0, 0, thsValPtr, std::vector<Reflect::example::Object>() };
 
-  try
-    {
-    inv.fn(&boxer, &data1);
-    }
-  catch(...)
-    {
-    }
+  VERIFY_NO_THROWS([&]() { inv.fn(&boxer, &data1); });
 
   QVERIFY(data1.results.size() == 3);
   QVERIFY(data1.results[0].type == Reflect::findType<int>());
@@ -433,6 +408,7 @@ void ReflectTest::overloadingTest()
   Reflect::example::Boxer boxer;
 
   A a;
+  a.pork = SELF_VAL;
 
   A ths;
   Reflect::example::Object thsVal;
@@ -441,7 +417,7 @@ void ReflectTest::overloadingTest()
 
   Reflect::example::Object argVals1[2];
   Reflect::example::Object *argsP1[2];
-  Reflect::example::initArgs(&boxer, argVals1, argsP1, 5.0f, 4.0);
+  Reflect::example::initArgs(&boxer, argVals1, argsP1, FLOAT_VAL, DOUBLE_VAL);
   InvocationBuilder::Arguments args1 = { argsP1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
 
   Reflect::example::Object argVals2[1];
@@ -451,12 +427,12 @@ void ReflectTest::overloadingTest()
 
   Reflect::example::Object argVals3[1];
   Reflect::example::Object *argsP3[1];
-  Reflect::example::initArgs(&boxer, argVals3, argsP3, 5.0f);
+  Reflect::example::initArgs(&boxer, argVals3, argsP3, FLOAT_VAL);
   InvocationBuilder::Arguments args3 = { argsP3, 1, nullptr, std::vector<Reflect::example::Object>() };
 
   Reflect::example::Object argVals4[2];
   Reflect::example::Object *argsP4[2];
-  Reflect::example::initArgs(&boxer, argVals4, argsP4, &a, 5.0f);
+  Reflect::example::initArgs(&boxer, argVals4, argsP4, &a, FLOAT_VAL);
   InvocationBuilder::Arguments args4 = { argsP4, 2, thsValPtr, std::vector<Reflect::example::Object>() };
 
   Reflect::example::Object argVals5[1];
@@ -477,6 +453,31 @@ void ReflectTest::overloadingTest()
   QVERIFY(InvocationBuilder::canCall<Overload2>(&boxer, &args3));
   QVERIFY(InvocationBuilder::canCall<Overload2>(&boxer, &args4));
   QVERIFY(!InvocationBuilder::canCall<Overload2>(&boxer, &args5));
+
+  InvocationBuilder::Call args2Call = { &args2, &boxer };
+  InvocationBuilder::Call args3Call = { &args3, &boxer };
+  InvocationBuilder::Call args5Call = { &args5, &boxer };
+
+  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args1); });
+  VERIFY_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args2); },
+    const Reflect::OverloadException &,
+    Reflect::OverloadException::build<InvocationBuilder>(&args2Call));
+  VERIFY_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args3); },
+    const Reflect::OverloadException &,
+    Reflect::OverloadException::build<InvocationBuilder>(&args3Call));
+  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args4); });
+  VERIFY_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args5); },
+    const Reflect::OverloadException &,
+    Reflect::OverloadException::build<InvocationBuilder>(&args5Call));
+
+  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args1); });
+  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args2); });
+  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args3); });
+  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args4); });
+  VERIFY_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args5); },
+    const Reflect::OverloadException &,
+  Reflect::OverloadException::build<InvocationBuilder>(&args5Call));
+
 
   /*typedef Reflect::FunctionArgCountSelector<InvocationBuilder,
     Reflect::FunctionArgCountBlock<2, Overload1>,

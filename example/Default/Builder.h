@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 #include <cassert>
-#include "QDebug"
 
 namespace Reflect
 {
@@ -272,6 +271,33 @@ public:
     Boxer *boxer;
     };
   typedef Call *CallData;
+
+  static std::string describeArguments(CallData args)
+    {
+    auto voidType = Reflect::findType<void>();
+
+    std::string argDesc;
+    for (size_t i = 0; i < args->args->argCount; ++i)
+      {
+      if (i != 0)
+        {
+        argDesc += ", ";
+        }
+      argDesc += args->args->args[i] ? args->args->args[i]->type->name() : voidType->name();
+      }
+
+    std::string result;
+    if (args->args->ths)
+      {
+      result = args->args->ths->type->name();
+      }
+    else
+      {
+      result = voidType->name();
+      }
+    result += " ->( " + argDesc + " )";
+    return result;
+    }
 
   static std::size_t getArgumentCount(CallData args)
     {

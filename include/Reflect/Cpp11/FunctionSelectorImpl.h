@@ -1,5 +1,6 @@
 #pragma once
 #include "Reflect/CanCallHelper.h"
+#include "Reflect/Exceptions.h"
 
 namespace Reflect
 {
@@ -16,6 +17,11 @@ public:
     {
     detail::FunctionSelectorCanCallHelper<InvHelper, Selection> helper(data);
     tupleEach<Selection>(helper);
+
+    if (!helper.m_foundCall)
+      {
+      throw Reflect::OverloadException::build<InvHelper>(data);
+      }
     }
 
   static bool canCall(typename InvHelper::CallData data)

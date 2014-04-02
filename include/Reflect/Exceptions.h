@@ -12,6 +12,34 @@ public:
     }
   };
 
+class OverloadException : public CallException
+  {
+public:
+  template <typename InvHelper> static OverloadException build(typename InvHelper::CallData data)
+    {
+    OverloadException excep;
+    excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'";
+    return excep;
+    }
+
+  ~OverloadException() throw()
+    {
+    }
+
+  const char* what() const throw()
+    {
+    return m_error.c_str();
+    }
+
+  bool operator==(const OverloadException &e) const
+    {
+    return m_error == e.m_error;
+    }
+
+protected:
+  std::string m_error;
+  };
+
 class ArgCountException : public CallException
   {
 public:

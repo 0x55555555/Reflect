@@ -54,7 +54,7 @@ public:
   static std::size_t getArgumentCount(CallData data)
     {
     std::size_t count = Fwd::getArgumentCount(data);
-    return count == 0 ? 0 : count - 1;
+    return count == 0 ? 0 : count + 1;
     }
 
   template <typename T> static T unpackThis(CallData)

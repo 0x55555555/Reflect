@@ -64,5 +64,5 @@ HEADERS += \
     ../include/Crate/Exceptions.h \
     ../include/Reflect/Exceptions.h \
     ../include/Reflect/FunctionSelector.h \
-    ../include/Reflect/Cpp11/FunctionSelectorImpl.h
+    ../include/Reflect/Cpp11/FunctionSelectorImpl.h \
     ../include/Reflect/Macro/FunctionSelectorImpl.h
