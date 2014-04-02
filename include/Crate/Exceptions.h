@@ -28,6 +28,10 @@ public:
   const Reflect::Type *expected() const { return m_expected; }
   const Reflect::Type *actual() const { return m_actual; }
 
+  bool operator==(const TypeException &e) const
+    {
+    return m_expected == e.m_expected && m_actual == e.m_actual;
+    }
 protected:
   std::string m_error;
 

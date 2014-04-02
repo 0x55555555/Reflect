@@ -66,7 +66,7 @@ public:
 
   const Reflect::Type *getType(Object *o) const
     {
-    return o->type;
+    return o ? o->type : Reflect::findType<void>();
     }
 
   void *getMemory(Object *o)

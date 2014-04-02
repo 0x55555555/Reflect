@@ -31,6 +31,11 @@ public:
     return m_error.c_str();
     }
 
+  bool operator==(const ArgCountException &e) const
+    {
+    return m_expected == e.m_expected && m_actual == e.m_actual;
+    }
+
 protected:
   std::string m_error;
   std::size_t m_expected;

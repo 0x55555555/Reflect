@@ -12,6 +12,14 @@
 #define INT_VAL 2222
 #define SELF_VAL 500
 
+#define VERIFY_THROWS(lambda, type, equals) \
+  { bool thrown = false; \
+  try{ lambda(); } \
+  catch(type t) { thrown = true; QVERIFY2(t == equals, "unequal exception"); } \
+  catch(...) { QVERIFY2(false, "invalid exception type thrown"); } \
+  QVERIFY2(thrown, "Nothing was thrown"); \
+  }
+
 #define QCOMPARE_NO_RETURN(actual, expected) \
 do {\
     if (!QTest::qCompare(actual, expected, #actual, #expected, __FILE__, __LINE__))\
@@ -266,6 +274,7 @@ void ReflectTest::functionInvokeTest()
 
   InvocationBuilder::Arguments data1 = { args1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
   InvocationBuilder::Arguments data2 = { args2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data2_1 = { args2, 1, 0, std::vector<Reflect::example::Object>() };
   InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, std::vector<Reflect::example::Object>() };
 
   try
@@ -283,6 +292,26 @@ void ReflectTest::functionInvokeTest()
     {
     QVERIFY(false);
     }
+
+  auto inv1WithArg2 = [&]()
+    {
+    inv1.fn(&boxer, &data2);
+    };
+  VERIFY_THROWS(inv1WithArg2, const Reflect::ArgCountException &, Reflect::ArgCountException(2, 1));
+
+  auto inv2WithArg1 = [&]()
+    {
+    inv2.fn(&boxer, &data1);
+    };
+  VERIFY_THROWS(inv2WithArg1, const Crate::TypeException &, Crate::TypeException(Reflect::findType<A>(), Reflect::findType<float>()));
+
+  auto inv2WithNoThis = [&]()
+    {
+    inv2.fn(&boxer, &data2_1);
+    };
+  VERIFY_THROWS(inv2WithNoThis,
+    const Crate::ThisException &,
+    Crate::ThisException(Crate::TypeException(Reflect::findType<A>(), Reflect::findType<void>())));
 
   QVERIFY(data2.results.size() == 1);
   QVERIFY(data3.results.size() == 1);
