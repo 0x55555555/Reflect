@@ -5,7 +5,7 @@ namespace Reflect
 {
 
 /// \brief FunctionSelector picks a function from [Functions] based on input arguments, and calls it.
-template <typename InvHelper, typename... Functions> class FunctionSelector
+template <typename InvHelper, typename... Functions> class FunctionArgumentTypeSelector
   {
 public:
   typedef std::tuple<Functions...> Selection;
