@@ -1,5 +1,6 @@
 #pragma once
 #include <stdexcept>
+#include "TupleEach.h"
 
 namespace Reflect
 {
@@ -15,10 +16,29 @@ public:
 class OverloadException : public CallException
   {
 public:
-  template <typename InvHelper> static OverloadException build(typename InvHelper::CallData data)
+  template <typename InvHelper, typename Tuple> class OverloadHelper
+    {
+  public:
+    template <std::size_t Idx> bool visit()
+      {
+      typedef typename std::tuple_element<Idx, Tuple>::type ElementType;
+
+      options += InvHelper::template describeFunction<ElementType>() + "\n";
+      return false;
+      }
+
+    std::string options;
+    };
+
+  template <typename InvHelper, typename Overloads>
+      static OverloadException build(typename InvHelper::CallData data)
     {
     OverloadException excep;
-    excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'";
+
+    OverloadHelper<InvHelper, typename Overloads::Selection> helper;
+    tupleEach<typename Overloads::Selection>(helper);
+
+    excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'\nPossibilities are: " + helper.options;
     return excep;
     }
 

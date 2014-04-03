@@ -458,17 +458,23 @@ void ReflectTest::overloadingTest()
   InvocationBuilder::Call args3Call = { &args3, &boxer };
   InvocationBuilder::Call args5Call = { &args5, &boxer };
 
+  auto args2Excep = Reflect::OverloadException::build<InvocationBuilder, Overload1>(&args2Call);
+  auto args3Excep = Reflect::OverloadException::build<InvocationBuilder, Overload1>(&args3Call);
+  auto args5Excep = Reflect::OverloadException::build<InvocationBuilder, Overload1>(&args5Call);
+
   VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args1); });
   VERIFY_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args2); },
     const Reflect::OverloadException &,
-    Reflect::OverloadException::build<InvocationBuilder>(&args2Call));
+    args2Excep);
   VERIFY_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args3); },
     const Reflect::OverloadException &,
-    Reflect::OverloadException::build<InvocationBuilder>(&args3Call));
+    args3Excep);
   VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args4); });
   VERIFY_THROWS([&]() { InvocationBuilder::call<Overload1>(&boxer, &args5); },
     const Reflect::OverloadException &,
-    Reflect::OverloadException::build<InvocationBuilder>(&args5Call));
+    args5Excep);
+
+  auto args5Excep2 = Reflect::OverloadException::build<InvocationBuilder, Overload2>(&args5Call);
 
   VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args1); });
   VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args2); });
@@ -476,7 +482,12 @@ void ReflectTest::overloadingTest()
   VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args4); });
   VERIFY_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args5); },
     const Reflect::OverloadException &,
-  Reflect::OverloadException::build<InvocationBuilder>(&args5Call));
+  args5Excep2);
+
+  QCOMPARE(args5Excep2.what(),
+"Unable to find overload matching passed arguments 'A ->( bool )'\n"
+"Possibilities are: A ->( A )\n"
+"void ->( float )\n");
 
 
   /*typedef Reflect::FunctionArgCountSelector<InvocationBuilder,

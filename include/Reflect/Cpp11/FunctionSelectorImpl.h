@@ -9,6 +9,7 @@ namespace Reflect
 template <typename InvHelper, typename... Functions> class FunctionArgumentTypeSelector
   {
 public:
+  typedef FunctionArgumentTypeSelector<InvHelper, Functions...> ThisType;
   typedef std::tuple<Functions...> Selection;
 
   /// \brief Call to invoke the first matching function.
@@ -20,7 +21,7 @@ public:
 
     if (!helper.m_foundCall)
       {
-      throw Reflect::OverloadException::build<InvHelper>(data);
+      throw Reflect::OverloadException::build<InvHelper, ThisType>(data);
       }
     }
 

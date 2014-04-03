@@ -51,6 +51,17 @@ public:
     Builder::call(data);
     }
 
+  static std::string describeArguments(CallData args)
+    {
+    return Fwd::describeArguments(args);
+    }
+
+  template <typename Fn> static std::string describeFunction()
+    {
+    typedef typename std::tuple_element<0, typename Fn::Arguments>::type Class;
+    return describeFunction<Class, typename Fn::Arguments>(1);
+    }
+
   static std::size_t getArgumentCount(CallData data)
     {
     std::size_t count = Fwd::getArgumentCount(data);

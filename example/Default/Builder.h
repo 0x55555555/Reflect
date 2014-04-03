@@ -299,6 +299,45 @@ public:
     return result;
     }
 
+  template <typename Fn> static std::string describeFunction()
+    {
+    typedef typename Fn::Helper Helper;
+    return describeFunction<typename Helper::Class, typename Helper::Arguments>(0);
+    }
+
+  template <typename Arguments> class ArgHelper
+    {
+  public:
+    ArgHelper(std::size_t start)
+        : m_start(start)
+      {
+      }
+
+    template <std::size_t Idx> bool visit()
+      {
+      if (Idx > m_start)
+        {
+        m_result += ", ";
+        }
+
+      typedef typename std::tuple_element<Idx, Arguments>::type Element;
+
+      m_result += Reflect::findType<Element>()->name();
+      return false;
+      }
+
+    std::size_t m_start;
+    std::string m_result;
+    };
+
+  template <typename Class, typename Arguments> static std::string describeFunction(size_t argStart)
+    {
+    ArgHelper<Arguments> helper(argStart);
+    tupleEach<Arguments>(helper);
+
+    return Reflect::findType<Class>()->name() + " ->( " + helper.m_result + " )";
+    }
+
   static std::size_t getArgumentCount(CallData args)
     {
     return args->args->argCount;
