@@ -397,7 +397,7 @@ public:
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
-    data->args->results.push_back(Object());
+    data->args->results.emplace_back();
     Object &b = data->args->results.back();
 
     Caster<Return>::pack(data->boxer, &b, result);
