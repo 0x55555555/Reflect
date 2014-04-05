@@ -1,8 +1,7 @@
 #pragma once
+#include "Crate/Type.h"
 
-#include "Reflect/Type.h"
-
-namespace Reflect
+namespace Crate
 {
 namespace detail
 {

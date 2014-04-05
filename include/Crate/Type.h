@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <string>
 
-namespace Reflect
+namespace Crate
 {
 
 class Type

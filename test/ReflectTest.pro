@@ -44,19 +44,25 @@ linux-g++ {
 
 HEADERS += \
     ReflectTest.h \
-    ../include/Reflect/FunctionBuilder.h \
-    ../include/Reflect/Type.h \
-    ../include/Reflect/EmbeddedTypes.h \
     ../include/Reflect/Cpp11/FunctionBuilderImpl.h \
     ../include/Reflect/Macro/FunctionBuilderImpl.h \
     ../include/Reflect/Macro/FunctionBuilderImplTemplate.h \
-    ../include/Crate/TypeException.h \
+    ../include/Reflect/MethodInjectorBuilder.h \
+    ../include/Reflect/ReturnPacker.h \
+    ../include/Reflect/TupleEach.h \
+    ../include/Reflect/CanCallHelper.h \
+    ../include/Reflect/Exceptions.h \
+    ../include/Reflect/FunctionSelector.h \
+    ../include/Reflect/Cpp11/FunctionSelectorImpl.h \
+    ../include/Reflect/Macro/FunctionSelectorImpl.h \
+    ../include/Reflect/WrappedFunction.h \
+    ../include/Crate/Type.h \
+    ../include/Crate/EmbeddedTypes.h \
     ../include/Crate/BaseTraits.h \
     ../include/Crate/CopyTraits.h \
     ../include/Crate/ReferenceTraits.h \
     ../include/Crate/Traits.h \
     ../include/Crate/ReferenceNonCleanedTraits.h \
-    ../include/Reflect/MethodInjectorBuilder.h \
-    ../include/Reflect/ReturnPacker.h \
     ../include/Crate/DerivedTraits.h \
+    ../include/Crate/Exceptions.h \
     ../example/Default/Builder.h

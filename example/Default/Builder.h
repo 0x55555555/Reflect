@@ -1,5 +1,5 @@
 #pragma once
-#include "Crate/TypeException.h"
+#include "Crate/Exceptions.h"
 #include "Crate/Traits.h"
 #include <vector>
 #include <memory>
@@ -29,7 +29,7 @@ public:
 
   Boxer *boxer;
   Cleanup cleanup;
-  const Reflect::Type *type;
+  const Crate::Type *type;
 
   Object()
     {
@@ -37,6 +37,18 @@ public:
     boxer = nullptr;
     cleanup = nullptr;
     type = nullptr;
+    }
+
+  Object(Object&& o)
+    {
+    d = o.d;
+    o.d = nullptr;
+    boxer = o.boxer;
+    o.boxer = nullptr;
+    cleanup = o.cleanup;
+    o.cleanup = nullptr;
+    type = o.type;
+    o.type = nullptr;
     }
 
   void init(size_t s)
@@ -56,6 +68,9 @@ public:
       delete [] d;
       }
     }
+
+private:
+  Object(const Object &);
   };
 
 class Boxer
@@ -63,9 +78,9 @@ class Boxer
 public:
   typedef Object *BoxedData;
 
-  const Reflect::Type *getType(Object *o) const
+  const Crate::Type *getType(Object *o) const
     {
-    return o->type;
+    return o ? o->type : Crate::findType<void>();
     }
 
   void *getMemory(Object *o)
@@ -78,7 +93,7 @@ public:
     return o->d;
     }
 
-  void initialise(Object *o, const Type *t, Object::Cleanup c)
+  void initialise(Object *o, const Crate::Type *t, Object::Cleanup c)
     {
     o->type = t;
     o->boxer = this;
@@ -108,14 +123,14 @@ public:
 
   static bool canCast(Boxer *, const Object *o)
     {
-    return o->type == Reflect::findType<T>();
+    return o->type == Crate::findType<T>();
     }
 
   static T cast(Boxer *b, Object *o)
     {
     if (!canCast(b, o))
       {
-      throw Crate::TypeException(o->type, Reflect::findType<T>());
+      throw Crate::TypeException(o->type, Crate::findType<T>());
       }
 
     union
@@ -136,7 +151,7 @@ public:
         T *out;
     } conv;
 
-    o->type = Reflect::findType<T>();
+    o->type = Crate::findType<T>();
     conv.in = &o->d;
     *conv.out = t;
     }
@@ -158,7 +173,7 @@ public:
     T *data = Caster<T *>::cast(b, o);
     if (!data)
       {
-      throw Crate::TypeException(Reflect::findType<T>(), nullptr);
+      throw Crate::TypeException(Crate::findType<T>(), nullptr);
       }
 
     return *data;
@@ -177,7 +192,7 @@ public:
   typedef T *Result;
   typedef Crate::Traits<T> ClassTraits;
 
-  static bool canCast(Boxer *boxer, const Object *o)
+  static bool canCast(Boxer *boxer, Object *o)
     {
     return o && ClassTraits::canUnbox(boxer, o);
     }
@@ -258,11 +273,18 @@ public:
   class Arguments
     {
   public:
+    Arguments(Object **a, std::size_t c, Object *t)
+        : args(a), argCount(c), ths(t), resultCount(0)
+      {
+      }
+
+    Arguments(const Arguments &) = delete;
     Object **args;
     std::size_t argCount;
     Object *ths;
 
-    std::vector<Object> results;
+    Object results[10];
+    std::size_t resultCount;
     };
 
   struct Call
@@ -272,7 +294,78 @@ public:
     };
   typedef Call *CallData;
 
-  template <typename T> static T getThis(CallData args)
+  static std::string describeArguments(CallData args)
+    {
+    auto voidType = Crate::findType<void>();
+
+    std::string argDesc;
+    for (size_t i = 0; i < args->args->argCount; ++i)
+      {
+      if (i != 0)
+        {
+        argDesc += ", ";
+        }
+      argDesc += args->args->args[i] ? args->args->args[i]->type->name() : voidType->name();
+      }
+
+    std::string result;
+    if (args->args->ths)
+      {
+      result = args->args->ths->type->name();
+      }
+    else
+      {
+      result = voidType->name();
+      }
+    result += " ->( " + argDesc + " )";
+    return result;
+    }
+
+  template <typename Fn> static std::string describeFunction()
+    {
+    typedef typename Fn::Helper Helper;
+    return describeFunction<typename Helper::Class, typename Helper::Arguments>(0);
+    }
+
+  template <typename Arguments> class ArgHelper
+    {
+  public:
+    ArgHelper(std::size_t start)
+        : m_start(start)
+      {
+      }
+
+    template <std::size_t Idx> bool visit()
+      {
+      if (Idx > m_start)
+        {
+        m_result += ", ";
+        }
+
+      typedef typename std::tuple_element<Idx, Arguments>::type Element;
+
+      m_result += Crate::findType<Element>()->name();
+      return false;
+      }
+
+    std::size_t m_start;
+    std::string m_result;
+    };
+
+  template <typename Class, typename Arguments> static std::string describeFunction(size_t argStart)
+    {
+    ArgHelper<Arguments> helper(argStart);
+    tupleEach<Arguments>(helper);
+
+    return Crate::findType<Class>()->name() + " ->( " + helper.m_result + " )";
+    }
+
+  static std::size_t getArgumentCount(CallData args)
+    {
+    return args->args->argCount;
+    }
+
+  template <typename T> static T unpackThis(CallData args)
     {
     try
       {
@@ -282,6 +375,11 @@ public:
       {
       throw Crate::ThisException(type);
       }
+    }
+
+  template <typename T> static bool canUnpackThis(CallData args)
+    {
+    return Caster<T>::canCast(args->boxer, args->args->ths);
     }
 
   template <std::size_t I, typename Arg>
@@ -297,10 +395,15 @@ public:
       }
     }
 
+  template <std::size_t I, typename Arg>
+      static bool canUnpackArgument(CallData data)
+    {
+    return Caster<Arg>::canCast(data->boxer, data->args->args[I]);
+    }
+
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
-    data->args->results.push_back(Object());
-    Object &b = data->args->results.back();
+    Object &b = data->args->results[data->args->resultCount++];
 
     Caster<Return>::pack(data->boxer, &b, result);
     }

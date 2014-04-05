@@ -70,7 +70,7 @@ public:
   std::unique_ptr<Vector3> m_ptr;
   };
 
-namespace Reflect
+namespace Crate
 {
 namespace detail
 {
