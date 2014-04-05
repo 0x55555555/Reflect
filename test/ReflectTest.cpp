@@ -185,7 +185,7 @@ void ReflectTest::functionWrapTest()
   Reflect::example::Object argVals[3];
   Reflect::example::Object *args1[3];
   Reflect::example::initArgs(&boxer, argVals, args1, a, b, c);
-  InvocationBuilder::Arguments data1 = { args1, 3, nullptr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1(args1, 3, nullptr);
 
   VERIFY_NO_THROWS([&]() { inv1.fn(&boxer, &data1); });
   }
@@ -209,7 +209,7 @@ void ReflectTest::methodInjectionTest()
   Reflect::example::Object argVals[2];
   Reflect::example::Object *args1[2];
   Reflect::example::initArgs(&boxer, argVals, args1, b, c);
-  InvocationBuilder::Arguments data1 = { args1, 2, &thsVal, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1(args1, 2, &thsVal);
 
   VERIFY_NO_THROWS([&]() { inv1.fn(&boxer, &data1); });
   }
@@ -259,10 +259,10 @@ void ReflectTest::functionInvokeTest()
   Reflect::example::Object *thsValPtr;
   Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
 
-  InvocationBuilder::Arguments data1 = { args1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
-  InvocationBuilder::Arguments data2 = { args2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
-  InvocationBuilder::Arguments data2_1 = { args2, 1, 0, std::vector<Reflect::example::Object>() };
-  InvocationBuilder::Arguments data3 = { args3, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1(args1, 2, thsValPtr);
+  InvocationBuilder::Arguments data2(args2, 1, thsValPtr);
+  InvocationBuilder::Arguments data2_1(args2, 1, 0);
+  InvocationBuilder::Arguments data3(args3, 1, thsValPtr);
 
   VERIFY_NO_THROWS([&]() {
     inv1.fn(&boxer, &data1);
@@ -292,8 +292,8 @@ void ReflectTest::functionInvokeTest()
     const Crate::ThisException &,
     Crate::ThisException(Crate::TypeException(Reflect::findType<A>(), Reflect::findType<void>())));
 
-  QVERIFY(data2.results.size() == 1);
-  QVERIFY(data3.results.size() == 1);
+  QVERIFY(data2.resultCount == 1);
+  QVERIFY(data3.resultCount == 1);
   QCOMPARE(Reflect::example::Caster<int>::cast(&boxer, &data2.results[0]), INT_VAL);
   QCOMPARE(Reflect::example::Caster<A *>::cast(&boxer, &data3.results[0])->pork, SELF_VAL);
   }
@@ -314,11 +314,11 @@ void ReflectTest::multipleReturnTest()
   Reflect::example::Object thsVal;
   Reflect::example::Object *thsValPtr;
   Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
-  InvocationBuilder::Arguments data1 = { 0, 0, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments data1(0, 0, thsValPtr);
 
   VERIFY_NO_THROWS([&]() { inv.fn(&boxer, &data1); });
 
-  QVERIFY(data1.results.size() == 3);
+  QVERIFY(data1.resultCount == 3);
   QVERIFY(data1.results[0].type == Reflect::findType<int>());
   QVERIFY(data1.results[1].type == Reflect::findType<float>());
   QVERIFY(data1.results[2].type == Reflect::findType<double>());
@@ -356,22 +356,22 @@ void ReflectTest::canCallTest()
   Reflect::example::Object argVals1[2];
   Reflect::example::Object *argsP1[2];
   Reflect::example::initArgs(&boxer, argVals1, argsP1, 5.0f, 4.0);
-  InvocationBuilder::Arguments args1 = { argsP1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args1(argsP1, 2, thsValPtr);
 
   Reflect::example::Object argVals2[1];
   Reflect::example::Object *argsP2[1];
   Reflect::example::initArgs(&boxer, argVals2, argsP2, &a);
-  InvocationBuilder::Arguments args2 = { argsP2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args2(argsP2, 1, thsValPtr);
 
   Reflect::example::Object argVals3[1];
   Reflect::example::Object *argsP3[1];
   Reflect::example::initArgs(&boxer, argVals3, argsP3, 5.0f);
-  InvocationBuilder::Arguments args3 = { argsP3, 1, nullptr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args3(argsP3, 1, nullptr);
 
   Reflect::example::Object argVals4[2];
   Reflect::example::Object *argsP4[2];
   Reflect::example::initArgs(&boxer, argVals4, argsP4, &a, 5.0f);
-  InvocationBuilder::Arguments args4 = { argsP4, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args4(argsP4, 2, thsValPtr);
 
   QVERIFY(CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args1));
   QVERIFY(!CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args1));
@@ -416,27 +416,27 @@ void ReflectTest::overloadingTest()
   Reflect::example::Object argVals1[2];
   Reflect::example::Object *argsP1[2];
   Reflect::example::initArgs(&boxer, argVals1, argsP1, FLOAT_VAL, DOUBLE_VAL);
-  InvocationBuilder::Arguments args1 = { argsP1, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args1(argsP1, 2, thsValPtr);
 
   Reflect::example::Object argVals2[1];
   Reflect::example::Object *argsP2[1];
   Reflect::example::initArgs(&boxer, argVals2, argsP2, &a);
-  InvocationBuilder::Arguments args2 = { argsP2, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args2(argsP2, 1, thsValPtr);
 
   Reflect::example::Object argVals3[1];
   Reflect::example::Object *argsP3[1];
   Reflect::example::initArgs(&boxer, argVals3, argsP3, FLOAT_VAL);
-  InvocationBuilder::Arguments args3 = { argsP3, 1, nullptr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args3(argsP3, 1, nullptr);
 
   Reflect::example::Object argVals4[2];
   Reflect::example::Object *argsP4[2];
   Reflect::example::initArgs(&boxer, argVals4, argsP4, &a, FLOAT_VAL);
-  InvocationBuilder::Arguments args4 = { argsP4, 2, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args4(argsP4, 2, thsValPtr);
 
   Reflect::example::Object argVals5[1];
   Reflect::example::Object *argsP5[1];
   Reflect::example::initArgs(&boxer, argVals5, argsP5, false);
-  InvocationBuilder::Arguments args5 = { argsP5, 1, thsValPtr, std::vector<Reflect::example::Object>() };
+  InvocationBuilder::Arguments args5(argsP5, 1, thsValPtr);
 
   typedef Reflect::FunctionArgumentTypeSelector<Method1::Builder, Method4::Builder> Overload1; // 2 args
   typedef Reflect::FunctionArgumentTypeSelector<Method2::Builder, Method3::Builder> Overload2; // 1 arg

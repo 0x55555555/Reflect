@@ -273,12 +273,18 @@ public:
   class Arguments
     {
   public:
+    Arguments(Object **a, std::size_t c, Object *t)
+        : args(a), argCount(c), ths(t), resultCount(0)
+      {
+      }
+
     Arguments(const Arguments &) = delete;
     Object **args;
     std::size_t argCount;
     Object *ths;
 
-    std::vector<Object> results;
+    Object results[10];
+    std::size_t resultCount;
     };
 
   struct Call
@@ -397,8 +403,7 @@ public:
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
-    data->args->results.emplace_back();
-    Object &b = data->args->results.back();
+    Object &b = data->args->results[data->args->resultCount++];
 
     Caster<Return>::pack(data->boxer, &b, result);
     }
