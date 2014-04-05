@@ -39,6 +39,18 @@ public:
     type = nullptr;
     }
 
+  Object(Object&& o)
+    {
+    d = o.d;
+    o.d = nullptr;
+    boxer = o.boxer;
+    o.boxer = nullptr;
+    cleanup = o.cleanup;
+    o.cleanup = nullptr;
+    type = o.type;
+    o.type = nullptr;
+    }
+
   void init(size_t s)
     {
     assert(!d);
@@ -56,6 +68,9 @@ public:
       delete [] d;
       }
     }
+
+private:
+  Object(const Object &);
   };
 
 class Boxer
@@ -258,6 +273,7 @@ public:
   class Arguments
     {
   public:
+    Arguments(const Arguments &) = delete;
     Object **args;
     std::size_t argCount;
     Object *ths;

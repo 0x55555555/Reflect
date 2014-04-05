@@ -53,30 +53,28 @@ namespace detail
 /// \param InvHelper      A user defined helper which knows how to pack and unpack arguments.
 /// \param FunctionHelper The type of the function to be wrapped - a specialised FunctionHelper<...>
 /// \param Fn             The function to call.
-template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
+template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     struct CallHelper
   {
-  /// \brief The CallerData required by InvHelper to call the function.
-  typedef typename InvHelper::CallData CallerData;
-      typedef _FunctionHelper FunctionHelper;
+  typedef _FunctionHelper Helper;
 
   /// \brief Call to invoke the function.
   /// \param data The data containing the arguments which are passed to the function.
-  static void call(CallerData data)
+  template <typename InvHelper> static void call(typename InvHelper::CallData data)
     {
-    typedef std::tuple_size<typename FunctionHelper::Arguments> ArgCount;
+    typedef std::tuple_size<typename Helper::Arguments> ArgCount;
     // The correct dispatcher - based on the ReturnType.
     typedef ReturnDispatch<
       ArgCount::value,
       InvHelper,
-      FunctionHelper,
+      Helper,
       Fn,
-      typename FunctionHelper::ReturnType> CallDispatch;
+      typename Helper::ReturnType> CallDispatch;
 
-    if (InvHelper::getArgumentCount(data) < std::tuple_size<typename FunctionHelper::Arguments>::value)
+    if (InvHelper::getArgumentCount(data) < std::tuple_size<typename Helper::Arguments>::value)
       {
       throw ArgCountException(
-        std::tuple_size<typename FunctionHelper::Arguments>::value,
+        std::tuple_size<typename Helper::Arguments>::value,
         InvHelper::getArgumentCount(data));
       }
 
@@ -84,10 +82,10 @@ template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper
     CallDispatch::call(data);
     }
 
-  static bool canCall(CallerData data)
+  template <typename InvHelper> static bool canCall(typename InvHelper::CallData data)
     {
-    return detail::CanCallHelper<InvHelper>::template canCast<typename FunctionHelper::Arguments>(data) &&
-        FunctionHelper::template canCastThis<InvHelper>(data);
+    return detail::CanCallHelper<InvHelper>::template canCast<typename Helper::Arguments>(data) &&
+        Helper::template canCastThis<InvHelper>(data);
     }
   };
 

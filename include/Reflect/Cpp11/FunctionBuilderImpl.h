@@ -60,28 +60,26 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 /// \param InvHelper      A user defined helper which knows how to pack and unpack arguments.
 /// \param FunctionHelper The type of the function to be wrapped - a specialised FunctionHelper<...>
 /// \param Fn             The function to call.
-template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
+template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     struct CallHelper
   {
-  /// \brief The CallerData required by InvHelper to call the function.
-  typedef typename InvHelper::CallData CallerData;
-  typedef _FunctionHelper FunctionHelper;
+  typedef _FunctionHelper Helper;
 
   /// \brief Call to invoke the function.
   /// \param data The data containing the arguments which are passed to the function.
-  static void call(CallerData data)
+  template <typename InvHelper> static void call(typename InvHelper::CallData data)
     {
     // The size of the tuple.
-    typedef std::tuple_size<typename FunctionHelper::Arguments> TupleSize;
+    typedef std::tuple_size<typename Helper::Arguments> TupleSize;
     // Indices for the arguments.
     typedef BuildIndices<TupleSize::value> IndicesForFunction;
     // The correct dispatcher - based on the ReturnType.
-    typedef ReturnDispatch<InvHelper, FunctionHelper, Fn, typename FunctionHelper::ReturnType> Dispatch;
+    typedef ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
 
-    if (InvHelper::getArgumentCount(data) < std::tuple_size<typename FunctionHelper::Arguments>::value)
+    if (InvHelper::getArgumentCount(data) < std::tuple_size<typename Helper::Arguments>::value)
       {
       throw ArgCountException(
-        std::tuple_size<typename FunctionHelper::Arguments>::value,
+        std::tuple_size<typename Helper::Arguments>::value,
         InvHelper::getArgumentCount(data));
       }
 
@@ -89,10 +87,10 @@ template <typename InvHelper, typename _FunctionHelper, typename _FunctionHelper
     Dispatch::call(data, IndicesForFunction());
     }
 
-  static bool canCall(CallerData data)
+  template <typename InvHelper> static bool canCall(typename InvHelper::CallData data)
     {
-    return detail::CanCallHelper<InvHelper>::template canCast<typename FunctionHelper::Arguments>(data) &&
-        FunctionHelper::template canCastThis<InvHelper>(data);
+    return detail::CanCallHelper<InvHelper>::template canCast<typename Helper::Arguments>(data) &&
+        Helper::template canCastThis<InvHelper>(data);
     }
   };
 

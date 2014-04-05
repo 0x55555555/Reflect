@@ -33,11 +33,11 @@ do {\
 class A
   {
 public:
-  void pork1(const float& in, double* pork)
+  void pork1(const float& in, double pork)
     {
     QCOMPARE_NO_RETURN(this->pork, SELF_VAL);
     QCOMPARE_NO_RETURN(in, FLOAT_VAL);
-    QCOMPARE_NO_RETURN(*pork, DOUBLE_VAL);
+    QCOMPARE_NO_RETURN(pork, DOUBLE_VAL);
     }
 
   int pork2(A *a) const
@@ -109,28 +109,28 @@ public:
     Signature fn;
     };
 
-  template <typename Builder> static Result build()
+  template <typename Function, typename Builder=InvocationBuilder> static Result buildCall()
     {
-    Result r = { call<Builder> };
+    Result r = { call<Function, Builder> };
     return r;
     }
 
-  template <typename Builder> static CanCallResult buildCanCall()
+  template <typename Function, typename Builder=InvocationBuilder> static CanCallResult buildCanCall()
     {
-    CanCallResult r = { canCall<Builder> };
+    CanCallResult r = { canCall<Function, Builder> };
     return r;
     }
 
-  template <typename Builder> static void call(Reflect::example::Boxer *b, Arguments *data)
+  template <typename Function, typename Builder=InvocationBuilder> static void call(Reflect::example::Boxer *b, Arguments *data)
     {
     Call call = { data, b };
-    Builder::call(&call);
+    Function::template call<Builder>(&call);
     }
 
-  template <typename Builder> static bool canCall(Reflect::example::Boxer *b, Arguments *data)
+  template <typename Function, typename Builder=InvocationBuilder> static bool canCall(Reflect::example::Boxer *b, Arguments *data)
     {
     Call call = { data, b };
-    return Builder::canCall(&call);
+    return Function::template canCall<Builder>(&call);
     }
   };
 
@@ -139,26 +139,22 @@ void ReflectTest::methodWrapTest()
   using namespace Reflect;
   typedef A ReflectClass;
 
-  auto method1 = REFLECT_METHOD(pork1);
-  auto method2 = REFLECT_METHOD(pork2);
-  auto method3 = REFLECT_METHOD(pork3);
+  typedef REFLECT_METHOD(pork1) Method1;
+  typedef REFLECT_METHOD(pork2) Method2;
+  typedef REFLECT_METHOD(pork3) Method3;
 
-  QCOMPARE(method1.returnType(), findType<void>());
-  QCOMPARE(method2.returnType(), findType<int>());
-  QCOMPARE(method3.returnType(), findType<A*>());
+  QCOMPARE(Method1::returnType(), findType<void>());
+  QCOMPARE(Method2::returnType(), findType<int>());
+  QCOMPARE(Method3::returnType(), findType<A*>());
 
-  QCOMPARE((int)method1.argumentCount(), 2);
-  QCOMPARE((int)method2.argumentCount(), 1);
-  QCOMPARE((int)method3.argumentCount(), 1);
+  QCOMPARE((int)Method1::argumentCount(), 2);
+  QCOMPARE((int)Method2::argumentCount(), 1);
+  QCOMPARE((int)Method3::argumentCount(), 1);
 
-  QCOMPARE(method1.argumentType<0>(), findType<const float&>());
-  QCOMPARE(method1.argumentType<1>(), findType<double*>());
-  QCOMPARE(method2.argumentType<0>(), findType<A *>());
-  QCOMPARE(method3.argumentType<0>(), findType<const float &>());
-
-  typedef decltype(method1) Method1;
-  typedef decltype(method2) Method2;
-  typedef decltype(method3) Method3;
+  QCOMPARE(Method1::argumentType<0>(), findType<const float&>());
+  QCOMPARE(Method1::argumentType<1>(), findType<double*>());
+  QCOMPARE(Method2::argumentType<0>(), findType<A *>());
+  QCOMPARE(Method3::argumentType<0>(), findType<const float &>());
 
   QCOMPARE(Method1::Helper::Const::value, false);
   QCOMPARE(Method2::Helper::Const::value, true);
@@ -176,13 +172,13 @@ void ReflectTest::methodWrapTest()
 void ReflectTest::functionWrapTest()
   {
   using namespace Reflect;
-  auto fn = REFLECT_FUNCTION(staticMethod);
+  typedef REFLECT_FUNCTION(staticMethod) Fn;
 
   A a;
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = fn.buildCall<InvocationBuilder>();
+  auto inv1 = InvocationBuilder::buildCall<Fn::Builder>();
 
   Reflect::example::Boxer boxer;
 
@@ -197,12 +193,12 @@ void ReflectTest::functionWrapTest()
 void ReflectTest::methodInjectionTest()
   {
   using namespace Reflect;
-  auto fn = REFLECT_FUNCTION(staticMethod);
+  typedef REFLECT_FUNCTION(staticMethod) Fn;
 
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = fn.buildCall<MethodInjectorBuilder<InvocationBuilder>>();
+  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildCall<Fn::Builder>();
 
   Reflect::example::Boxer boxer;
 
@@ -223,13 +219,13 @@ void ReflectTest::functionInvokeTest()
   using namespace Reflect;
   typedef A ReflectClass;
 
-  auto method1 = REFLECT_METHOD(pork1);
-  auto method2 = REFLECT_METHOD(pork2);
-  auto method3 = REFLECT_METHOD(pork3);
+  typedef REFLECT_METHOD(pork1) Method1;
+  typedef REFLECT_METHOD(pork2) Method2;
+  typedef REFLECT_METHOD(pork3) Method3;
 
-  auto inv1 = method1.buildCall<InvocationBuilder>();
-  auto inv2 = method2.buildCall<InvocationBuilder>();
-  auto inv3 = method3.buildCall<InvocationBuilder>();
+  auto inv1 = InvocationBuilder::buildCall<Method1::Builder>();
+  auto inv2 = InvocationBuilder::buildCall<Method2::Builder>();
+  auto inv3 = InvocationBuilder::buildCall<Method3::Builder>();
 
   A a;
   a.pork = SELF_VAL;
@@ -238,7 +234,7 @@ void ReflectTest::functionInvokeTest()
   float flt = FLOAT_VAL;
 
   const float &arg11 = flt;
-  double *arg12 = &dbl;
+  double arg12 = dbl;
   A* arg21 = &a;
   const float &arg31 = flt;
 
@@ -308,9 +304,9 @@ void ReflectTest::multipleReturnTest()
   using namespace Reflect;
   typedef A ReflectClass;
 
-  auto method = REFLECT_METHOD(multiReturn);
+  typedef REFLECT_METHOD(multiReturn) Method;
 
-  auto inv = method.buildCall<InvocationBuilder>();
+  auto inv = InvocationBuilder::buildCall<Method::Builder>();
 
   Reflect::example::Boxer boxer;
 
@@ -334,9 +330,9 @@ void ReflectTest::multipleReturnTest()
 template <typename Builder> class CanCallTestHelper
   {
 public:
-  template <typename T> static bool canCall(Reflect::example::Boxer *b, typename T::Arguments data)
+  template <typename T> static bool canCall(Reflect::example::Boxer *b, typename T::Arguments &data)
     {
-    auto result = Builder().template buildCanCall<T>();
+    auto result = T::template buildCanCall<typename Builder::Builder>();
     return result.fn(b, &data);
     }
   };
@@ -411,6 +407,8 @@ void ReflectTest::overloadingTest()
   a.pork = SELF_VAL;
 
   A ths;
+  ths.pork = SELF_VAL;
+
   Reflect::example::Object thsVal;
   Reflect::example::Object *thsValPtr;
   Reflect::example::initArg(&boxer, thsVal, thsValPtr, &ths);
@@ -440,8 +438,8 @@ void ReflectTest::overloadingTest()
   Reflect::example::initArgs(&boxer, argVals5, argsP5, false);
   InvocationBuilder::Arguments args5 = { argsP5, 1, thsValPtr, std::vector<Reflect::example::Object>() };
 
-  typedef Reflect::FunctionArgumentTypeSelector<InvocationBuilder, Method1, Method4> Overload1; // 2 args
-  typedef Reflect::FunctionArgumentTypeSelector<InvocationBuilder, Method2, Method3> Overload2; // 1 arg
+  typedef Reflect::FunctionArgumentTypeSelector<Method1::Builder, Method4::Builder> Overload1; // 2 args
+  typedef Reflect::FunctionArgumentTypeSelector<Method2::Builder, Method3::Builder> Overload2; // 1 arg
 
   QVERIFY(InvocationBuilder::canCall<Overload1>(&boxer, &args1));
   QVERIFY(!InvocationBuilder::canCall<Overload1>(&boxer, &args2));
@@ -490,14 +488,23 @@ void ReflectTest::overloadingTest()
 "void ->( float )\n");
 
 
-  /*typedef Reflect::FunctionArgCountSelector<InvocationBuilder,
-    Reflect::FunctionArgCountBlock<2, Overload1>,
-    Reflect::FunctionArgCountBlock<1, Overload2> > AllMethods;
+  typedef Reflect::FunctionArgumentCountSelector<
+    Reflect::FunctionArgCountSelectorBlock<2, Overload1>,
+    Reflect::FunctionArgCountSelectorBlock<1, Overload2> > AllMethods;
 
   QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args1));
   QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args2));
   QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args3));
-  QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args4));*/
+  QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args4));
+  QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args5)); // length matches, types dont - throws in call.
+
+  VERIFY_NO_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args1); });
+  VERIFY_NO_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args2); });
+  VERIFY_NO_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args3); });
+  VERIFY_NO_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args4); });
+  VERIFY_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args5); },
+    const Reflect::OverloadException &,
+    args5Excep2);
 
   }
 

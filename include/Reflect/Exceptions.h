@@ -60,6 +60,54 @@ protected:
   std::string m_error;
   };
 
+class OverloadArgCountException : public CallException
+  {
+public:
+  template <typename InvHelper, typename Tuple> class OverloadHelper
+    {
+  public:
+    template <std::size_t Idx> bool visit()
+      {
+      typedef typename std::tuple_element<Idx, Tuple>::type ElementType;
+      typedef typename ElementType::Count Count;
+
+      options += std::to_string(Count::value) + "\n";
+      return false;
+      }
+
+    std::string options;
+    };
+
+  template <typename InvHelper, typename Overloads>
+      static OverloadArgCountException build(typename InvHelper::CallData data)
+    {
+    OverloadArgCountException excep;
+
+    OverloadHelper<InvHelper, typename Overloads::Selection> helper;
+    tupleEach<typename Overloads::Selection>(helper);
+
+    excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'\nPossibilities are: " + helper.options;
+    return excep;
+    }
+
+  ~OverloadArgCountException() throw()
+    {
+    }
+
+  const char* what() const throw()
+    {
+    return m_error.c_str();
+    }
+
+  bool operator==(const OverloadArgCountException &e) const
+    {
+    return m_error == e.m_error;
+    }
+
+protected:
+  std::string m_error;
+  };
+
 class ArgCountException : public CallException
   {
 public:
