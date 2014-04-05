@@ -1,7 +1,7 @@
 #include "ReflectTest.h"
 #include "Reflect/EmbeddedTypes.h"
 #include "Reflect/MethodInjectorBuilder.h"
-#include "Reflect/FunctionBuilder.h"
+#include "Reflect/WrappedFunction.h"
 #include "Reflect/FunctionSelector.h"
 #include "../example/Default/Builder.h"
 #include <QtTest>
@@ -339,10 +339,11 @@ public:
 
 void ReflectTest::canCallTest()
   {
-  typedef Reflect::FunctionBuilder<decltype(&A::pork1), &A::pork1> Method1; // 2 args
-  typedef Reflect::FunctionBuilder<decltype(&A::pork2), &A::pork2> Method2; // 1 arg
-  typedef Reflect::FunctionBuilder<decltype(&A::pork3), &A::pork3> Method3; // 1 arg
-  typedef Reflect::FunctionBuilder<decltype(&A::pork4), &A::pork4> Method4; // 2 args
+  REFLECT_FUNCTION_HELPER(A);
+  typedef REFLECT_METHOD(pork1) Method1; // 2 args
+  typedef REFLECT_METHOD(pork2) Method2; // 1 arg
+  typedef REFLECT_METHOD(pork3) Method3; // 1 arg
+  typedef REFLECT_METHOD(pork4) Method4; // 2 args
 
   Reflect::example::Boxer boxer;
 
@@ -396,10 +397,11 @@ void ReflectTest::canCallTest()
 
 void ReflectTest::overloadingTest()
   {
-  typedef Reflect::FunctionBuilder<decltype(&A::pork1), &A::pork1> Method1; // 2 args
-  typedef Reflect::FunctionBuilder<decltype(&A::pork2), &A::pork2> Method2; // 1 arg
-  typedef Reflect::FunctionBuilder<decltype(&A::pork3), &A::pork3> Method3; // 1 arg
-  typedef Reflect::FunctionBuilder<decltype(&A::pork4), &A::pork4> Method4; // 2 args
+  REFLECT_FUNCTION_HELPER(A);
+  typedef REFLECT_METHOD(pork1) Method1; // 2 args
+  typedef REFLECT_METHOD(pork2) Method2; // 1 arg
+  typedef REFLECT_METHOD(pork3) Method3; // 1 arg
+  typedef REFLECT_METHOD(pork4) Method4; // 2 args
 
   Reflect::example::Boxer boxer;
 

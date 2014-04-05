@@ -17,7 +17,7 @@ namespace Reflect
 ///        typedefing ReflectClass to generate a FunctionWrap.
 ///        Call buildInvocation on this function to build a reflected call
 ///        to the function.
-template <typename FnType, FnType Fn> class FunctionBuilder
+template <typename FnType, FnType Fn> class WrappedFunction
   {
 public:
   typedef detail::FunctionHelper<FnType> Helper;
@@ -41,8 +41,8 @@ public:
 
 #define REFLECT_FUNCTION_HELPER(cls) typedef cls ReflectClass
 #define REFLECT_FUNCTION_PTR(name) &name
-#define REFLECT_FUNCTION(name) Reflect::FunctionBuilder<decltype(REFLECT_FUNCTION_PTR(name)), REFLECT_FUNCTION_PTR(name)>
+#define REFLECT_FUNCTION(name) Reflect::WrappedFunction<decltype(REFLECT_FUNCTION_PTR(name)), REFLECT_FUNCTION_PTR(name)>
 #define REFLECT_METHOD_PTR(name) & ReflectClass::name
-#define REFLECT_METHOD(name) Reflect::FunctionBuilder<decltype(REFLECT_METHOD_PTR(name)), REFLECT_METHOD_PTR(name)>
+#define REFLECT_METHOD(name) Reflect::WrappedFunction<decltype(REFLECT_METHOD_PTR(name)), REFLECT_METHOD_PTR(name)>
 
 }

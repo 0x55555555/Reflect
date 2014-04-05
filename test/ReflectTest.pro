@@ -44,7 +44,6 @@ linux-g++ {
 
 HEADERS += \
     ReflectTest.h \
-    ../include/Reflect/FunctionBuilder.h \
     ../include/Reflect/Type.h \
     ../include/Reflect/EmbeddedTypes.h \
     ../include/Reflect/Cpp11/FunctionBuilderImpl.h \
@@ -65,4 +64,5 @@ HEADERS += \
     ../include/Reflect/Exceptions.h \
     ../include/Reflect/FunctionSelector.h \
     ../include/Reflect/Cpp11/FunctionSelectorImpl.h \
-    ../include/Reflect/Macro/FunctionSelectorImpl.h
+    ../include/Reflect/Macro/FunctionSelectorImpl.h \
+    ../include/Reflect/WrappedFunction.h
