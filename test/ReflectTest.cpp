@@ -1,5 +1,5 @@
 #include "ReflectTest.h"
-#include "Reflect/EmbeddedTypes.h"
+#include "Crate/EmbeddedTypes.h"
 #include "Reflect/MethodInjectorBuilder.h"
 #include "Reflect/WrappedFunction.h"
 #include "Reflect/FunctionSelector.h"
@@ -79,7 +79,7 @@ void staticMethod(A &a, int i, float e)
   QCOMPARE_NO_RETURN(e, FLOAT_VAL);
   }
 
-namespace Reflect
+namespace Crate
 {
 namespace detail
 {
@@ -143,18 +143,23 @@ void ReflectTest::methodWrapTest()
   typedef REFLECT_METHOD(pork2) Method2;
   typedef REFLECT_METHOD(pork3) Method3;
 
-  QCOMPARE(Method1::returnType(), findType<void>());
-  QCOMPARE(Method2::returnType(), findType<int>());
-  QCOMPARE(Method3::returnType(), findType<A*>());
+  QCOMPARE(Crate::findType<Method1::ReturnType>(), Crate::findType<void>());
+  QCOMPARE(Crate::findType<Method2::ReturnType>(), Crate::findType<int>());
+  QCOMPARE(Crate::findType<Method3::ReturnType>(), Crate::findType<A*>());
 
   QCOMPARE((int)Method1::argumentCount(), 2);
   QCOMPARE((int)Method2::argumentCount(), 1);
   QCOMPARE((int)Method3::argumentCount(), 1);
 
-  QCOMPARE(Method1::argumentType<0>(), findType<const float&>());
-  QCOMPARE(Method1::argumentType<1>(), findType<double*>());
-  QCOMPARE(Method2::argumentType<0>(), findType<A *>());
-  QCOMPARE(Method3::argumentType<0>(), findType<const float &>());
+  typedef typename std::tuple_element<0, typename Method1::Arguments>::type Method1Arg0;
+  typedef typename std::tuple_element<1, typename Method1::Arguments>::type Method1Arg1;
+  typedef typename std::tuple_element<0, typename Method2::Arguments>::type Method2Arg0;
+  typedef typename std::tuple_element<0, typename Method3::Arguments>::type Method3Arg0;
+
+  QCOMPARE(Crate::findType<Method1Arg0>(), Crate::findType<const float&>());
+  QCOMPARE(Crate::findType<Method1Arg1>(), Crate::findType<double*>());
+  QCOMPARE(Crate::findType<Method2Arg0>(), Crate::findType<A *>());
+  QCOMPARE(Crate::findType<Method3Arg0>(), Crate::findType<const float &>());
 
   QCOMPARE(Method1::Helper::Const::value, false);
   QCOMPARE(Method2::Helper::Const::value, true);
@@ -164,9 +169,9 @@ void ReflectTest::methodWrapTest()
   QCOMPARE(Method2::Helper::Static::value, false);
   QCOMPARE(Method3::Helper::Static::value, true);
 
-  QCOMPARE(findType<Method1::Helper::Class>(), findType<A>());
-  QCOMPARE(findType<Method2::Helper::Class>(), findType<A>());
-  QCOMPARE(findType<Method3::Helper::Class>(), findType<void>());
+  QCOMPARE(Crate::findType<Method1::Helper::Class>(), Crate::findType<A>());
+  QCOMPARE(Crate::findType<Method2::Helper::Class>(), Crate::findType<A>());
+  QCOMPARE(Crate::findType<Method3::Helper::Class>(), Crate::findType<void>());
   }
 
 void ReflectTest::functionWrapTest()
@@ -282,7 +287,7 @@ void ReflectTest::functionInvokeTest()
     };
   VERIFY_THROWS(inv2WithArg1,
     const Crate::ArgException &,
-    Crate::ArgException(Crate::TypeException(Reflect::findType<A>(), Reflect::findType<float>()), 0));
+    Crate::ArgException(Crate::TypeException(Crate::findType<A>(), Crate::findType<float>()), 0));
 
   auto inv2WithNoThis = [&]()
     {
@@ -290,7 +295,7 @@ void ReflectTest::functionInvokeTest()
     };
   VERIFY_THROWS(inv2WithNoThis,
     const Crate::ThisException &,
-    Crate::ThisException(Crate::TypeException(Reflect::findType<A>(), Reflect::findType<void>())));
+    Crate::ThisException(Crate::TypeException(Crate::findType<A>(), Crate::findType<void>())));
 
   QVERIFY(data2.resultCount == 1);
   QVERIFY(data3.resultCount == 1);
@@ -319,9 +324,9 @@ void ReflectTest::multipleReturnTest()
   VERIFY_NO_THROWS([&]() { inv.fn(&boxer, &data1); });
 
   QVERIFY(data1.resultCount == 3);
-  QVERIFY(data1.results[0].type == Reflect::findType<int>());
-  QVERIFY(data1.results[1].type == Reflect::findType<float>());
-  QVERIFY(data1.results[2].type == Reflect::findType<double>());
+  QVERIFY(data1.results[0].type == Crate::findType<int>());
+  QVERIFY(data1.results[1].type == Crate::findType<float>());
+  QVERIFY(data1.results[2].type == Crate::findType<double>());
   QVERIFY(data1.results[0].i == 5);
   QVERIFY(data1.results[1].f == 6.4f);
   QVERIFY(data1.results[2].db == 5.0);

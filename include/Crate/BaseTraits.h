@@ -33,9 +33,9 @@ public:
     return type == getType();
     }
 
-  static const Reflect::Type *getType()
+  static const Type *getType()
     {
-    return Reflect::findType<T>();
+    return findType<T>();
     }
 
   template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)

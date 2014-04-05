@@ -29,7 +29,7 @@ public:
 
   Boxer *boxer;
   Cleanup cleanup;
-  const Reflect::Type *type;
+  const Crate::Type *type;
 
   Object()
     {
@@ -78,9 +78,9 @@ class Boxer
 public:
   typedef Object *BoxedData;
 
-  const Reflect::Type *getType(Object *o) const
+  const Crate::Type *getType(Object *o) const
     {
-    return o ? o->type : Reflect::findType<void>();
+    return o ? o->type : Crate::findType<void>();
     }
 
   void *getMemory(Object *o)
@@ -93,7 +93,7 @@ public:
     return o->d;
     }
 
-  void initialise(Object *o, const Type *t, Object::Cleanup c)
+  void initialise(Object *o, const Crate::Type *t, Object::Cleanup c)
     {
     o->type = t;
     o->boxer = this;
@@ -123,14 +123,14 @@ public:
 
   static bool canCast(Boxer *, const Object *o)
     {
-    return o->type == Reflect::findType<T>();
+    return o->type == Crate::findType<T>();
     }
 
   static T cast(Boxer *b, Object *o)
     {
     if (!canCast(b, o))
       {
-      throw Crate::TypeException(o->type, Reflect::findType<T>());
+      throw Crate::TypeException(o->type, Crate::findType<T>());
       }
 
     union
@@ -151,7 +151,7 @@ public:
         T *out;
     } conv;
 
-    o->type = Reflect::findType<T>();
+    o->type = Crate::findType<T>();
     conv.in = &o->d;
     *conv.out = t;
     }
@@ -173,7 +173,7 @@ public:
     T *data = Caster<T *>::cast(b, o);
     if (!data)
       {
-      throw Crate::TypeException(Reflect::findType<T>(), nullptr);
+      throw Crate::TypeException(Crate::findType<T>(), nullptr);
       }
 
     return *data;
@@ -296,7 +296,7 @@ public:
 
   static std::string describeArguments(CallData args)
     {
-    auto voidType = Reflect::findType<void>();
+    auto voidType = Crate::findType<void>();
 
     std::string argDesc;
     for (size_t i = 0; i < args->args->argCount; ++i)
@@ -344,7 +344,7 @@ public:
 
       typedef typename std::tuple_element<Idx, Arguments>::type Element;
 
-      m_result += Reflect::findType<Element>()->name();
+      m_result += Crate::findType<Element>()->name();
       return false;
       }
 
@@ -357,7 +357,7 @@ public:
     ArgHelper<Arguments> helper(argStart);
     tupleEach<Arguments>(helper);
 
-    return Reflect::findType<Class>()->name() + " ->( " + helper.m_result + " )";
+    return Crate::findType<Class>()->name() + " ->( " + helper.m_result + " )";
     }
 
   static std::size_t getArgumentCount(CallData args)

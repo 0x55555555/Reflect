@@ -1,7 +1,7 @@
 #pragma once
 #include "Reflect/Exceptions.h"
-#include "Reflect/Type.h"
-#include "Reflect/EmbeddedTypes.h"
+#include "Crate/Type.h"
+#include "Crate/EmbeddedTypes.h"
 
 namespace Crate
 {
@@ -9,9 +9,9 @@ namespace Crate
 class TypeException : public Reflect::CallException
   {
 public:
-  TypeException(const Reflect::Type *expected, const Reflect::Type *actual)
-      : m_expected(expected ? expected : Reflect::findType<void>()),
-        m_actual(actual ? actual : Reflect::findType<void>())
+  TypeException(const Type *expected, const Type *actual)
+      : m_expected(expected ? expected : findType<void>()),
+        m_actual(actual ? actual : findType<void>())
     {
     m_error = "Expected '" + m_expected->name() + "' got '" + m_actual->name() + "'";
     }
@@ -25,8 +25,8 @@ public:
     return m_error.c_str();
     }
 
-  const Reflect::Type *expected() const { return m_expected; }
-  const Reflect::Type *actual() const { return m_actual; }
+  const Type *expected() const { return m_expected; }
+  const Type *actual() const { return m_actual; }
 
   bool operator==(const TypeException &e) const
     {
@@ -37,8 +37,8 @@ protected:
   std::string m_error;
 
 private:
-  const Reflect::Type *m_expected;
-  const Reflect::Type *m_actual;
+  const Type *m_expected;
+  const Type *m_actual;
   };
 
 class ThisException : public TypeException

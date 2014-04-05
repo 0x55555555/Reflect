@@ -6,8 +6,6 @@
 # include "Reflect/Cpp11/FunctionBuilderImpl.h"
 #endif
 
-#include "Reflect/Type.h"
-
 namespace Reflect
 {
 
@@ -25,18 +23,8 @@ public:
   typedef typename Helper::Arguments Arguments;
   typedef detail::CallHelper<Helper, Fn> Builder;
 
-  /// \brief Find the type of the return value of the function.
-  static const Type *returnType() { return findType<ReturnType>(); }
-
   /// \brief The number of arguments to be passed to the function
   static size_t argumentCount() { return std::tuple_size<Arguments>::value; }
-
-  /// \brief The type of the argument at N.
-  template <size_t N> static const Type *argumentType()
-    {
-    typedef typename std::tuple_element<N, Arguments>::type Type;
-    return findType<Type>();
-    }
   };
 
 #define REFLECT_FUNCTION_HELPER(cls) typedef cls ReflectClass
