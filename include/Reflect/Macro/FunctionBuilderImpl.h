@@ -71,7 +71,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
       Fn,
       typename Helper::ReturnType> CallDispatch;
 
-    if (InvHelper::getArgumentCount(data) < (std::size_t)std::tuple_size<typename Helper::Arguments>::value)
+    if (InvHelper::getArgumentCount(data) != (std::size_t)ArgCount::value)
       {
       throw ArgCountException(
         std::tuple_size<typename Helper::Arguments>::value,

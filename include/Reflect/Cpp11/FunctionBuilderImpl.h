@@ -76,7 +76,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     // The correct dispatcher - based on the ReturnType.
     typedef ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
 
-    if (InvHelper::getArgumentCount(data) < (std::size_t)std::tuple_size<typename Helper::Arguments>::value)
+    if (InvHelper::getArgumentCount(data) != (std::size_t)TupleSize::value)
       {
       throw ArgCountException(
         std::tuple_size<typename Helper::Arguments>::value,
