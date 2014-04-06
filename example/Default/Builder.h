@@ -361,12 +361,17 @@ public:
       {
       }
 
-    template <std::size_t Idx> bool visit()
+    void separate(std::size_t i)
       {
-      if (Idx > m_start)
+      if (i > m_start)
         {
         m_result += ", ";
         }
+      }
+
+    template <std::size_t Idx> bool visit()
+      {
+      separate(Idx);
 
       typedef typename std::tuple_element<Idx, Arguments>::type Element;
 
