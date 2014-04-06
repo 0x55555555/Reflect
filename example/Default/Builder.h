@@ -361,21 +361,21 @@ public:
       {
       }
 
-    void separate(std::size_t i)
+    void append(std::size_t i, const Crate::Type *type)
       {
       if (i > m_start)
         {
         m_result += ", ";
         }
+
+      m_result += type->name();
       }
 
     template <std::size_t Idx> bool visit()
       {
-      separate(Idx);
-
       typedef typename std::tuple_element<Idx, Arguments>::type Element;
+      append(Idx, Crate::findType<Element>());
 
-      m_result += Crate::findType<Element>()->name();
       return false;
       }
 
