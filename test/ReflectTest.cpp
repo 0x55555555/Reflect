@@ -445,6 +445,8 @@ void ReflectTest::overloadingTest()
   Reflect::example::initArgs(&boxer, argVals5, argsP5, false);
   InvocationBuilder::Arguments args5(argsP5, 1, thsValPtr);
 
+  InvocationBuilder::Arguments args6(nullptr, 0, thsValPtr);
+
   typedef Reflect::FunctionArgumentTypeSelector<Method1::Builder, Method4::Builder> Overload1; // 2 args
   typedef Reflect::FunctionArgumentTypeSelector<Method2::Builder, Method3::Builder> Overload2; // 1 arg
 
@@ -462,6 +464,7 @@ void ReflectTest::overloadingTest()
   InvocationBuilder::Call args2Call = { &args2, &boxer };
   InvocationBuilder::Call args3Call = { &args3, &boxer };
   InvocationBuilder::Call args5Call = { &args5, &boxer };
+  InvocationBuilder::Call args6Call = { &args6, &boxer };
 
   auto args2Excep = Reflect::OverloadException::build<InvocationBuilder, Overload1>(&args2Call);
   auto args3Excep = Reflect::OverloadException::build<InvocationBuilder, Overload1>(&args3Call);
@@ -504,6 +507,7 @@ void ReflectTest::overloadingTest()
   QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args3));
   QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args4));
   QVERIFY(InvocationBuilder::canCall<AllMethods>(&boxer, &args5)); // length matches, types dont - throws in call.
+  QVERIFY(!InvocationBuilder::canCall<AllMethods>(&boxer, &args6));
 
   VERIFY_NO_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args1); });
   VERIFY_NO_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args2); });
@@ -512,6 +516,16 @@ void ReflectTest::overloadingTest()
   VERIFY_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args5); },
     const Reflect::OverloadException &,
     args5Excep2);
+
+
+  auto args6Excep = Reflect::OverloadArgCountException::build<InvocationBuilder, AllMethods>(&args6Call);
+  VERIFY_THROWS([&](){ InvocationBuilder::call<AllMethods>(&boxer, &args6); },
+    const Reflect::OverloadArgCountException &,
+    args6Excep);
+
+  QCOMPARE(args6Excep.what(),
+"Unable to find overload matching passed arguments 'A ->(  )'\n"
+"Possibilities are functions taking 2 or 1 arguments");
 
   }
 
