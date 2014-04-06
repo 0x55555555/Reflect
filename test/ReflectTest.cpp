@@ -286,8 +286,8 @@ void ReflectTest::functionInvokeTest()
     inv2.fn(&boxer, &data1);
     };
   VERIFY_THROWS(inv2WithArg1,
-    const Crate::ArgException &,
-    Crate::ArgException(Crate::TypeException(Crate::findType<A>(), Crate::findType<float>()), 0));
+    const Reflect::ArgCountException &,
+    Reflect::ArgCountException(1, 2));
 
   auto inv2WithNoThis = [&]()
     {
@@ -484,10 +484,14 @@ void ReflectTest::overloadingTest()
 
   auto args5Excep2 = Reflect::OverloadException::build<InvocationBuilder, Overload2>(&args5Call);
 
-  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args1); });
+  VERIFY_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args1); },
+    const Reflect::ArgCountException,
+    Reflect::ArgCountException(1, 2));
   VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args2); });
   VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args3); });
-  VERIFY_NO_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args4); });
+  VERIFY_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args4); },
+    const Reflect::ArgCountException,
+    Reflect::ArgCountException(1, 2));
   VERIFY_THROWS([&]() { InvocationBuilder::call<Overload2>(&boxer, &args5); },
     const Reflect::OverloadException &,
   args5Excep2);
