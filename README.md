@@ -16,7 +16,6 @@ class Test
 
 Can have the `testFunction` wrapped with:
 ```cpp
-{
   // Specify which class is being wrapped
   //
   REFLECT_FUNCTION_HELPER(Test);
@@ -32,8 +31,84 @@ Can have the `testFunction` wrapped with:
   // Call the function!
   //
   inv1(...);
-}
 ```
+
+
+Overloaded Methods
+---------------------
+Reflect can wrap multiple methods into a single call. On calling, a method that matches the passed arguments is searched for, and called if available (exceptions are thrown if not callable).
+
+> Note there is a runtime overhead to using overloaded methods.
+
+An overloaded function can be build using:
+```cpp
+  // Method1 and Method2 are defined using REFLECT_METHOD, as above.
+  typedef Reflect::FunctionArgumentTypeSelector<Method1::Builder, Method2::Builder> Overload1;
+```
+`Overload1` can now be treated as the `Method1` definition above, and built into a new callable function.
+
+While the above system will accept functions taking different argument counts, it is more efficient to first switch between function argument counts, then switch on type.
+
+Multiple Overloaded functions can be built with:
+```cpp
+  typedef Reflect::FunctionArgumentCountSelector<
+    Reflect::FunctionArgCountSelectorBlock<2, Overload1>, // 2 specifies the argument count
+    Reflect::FunctionArgCountSelectorBlock<1, Overload2>  // 1 is the argument count
+    > AllMethods;
+```
+`AllMethods` can now be called using the methods above to generate callable functions. It will first search for a block taking te correct number of arguments, then call that block.
+
+
+Fake Methods
+---------------------
+Methods don't always exist on the class that is being wrapped, but it is convenient to present a function as a class method.
+
+For example, this function:
+```cpp
+void someFakeMethod(SomeClass &thsValue, float arg1, int arg2);
+```
+
+For example, can be *faked* as a method using:
+```cpp
+  // Specify which class is being wrapped
+  //
+  REFLECT_FUNCTION_HELPER(Test);
+  
+  // Generate a wrapper for the testFunction
+  //
+  typedef REFLECT_METHOD(testFunction) Method1;
+  
+  // Create a new function to invoke testFunction, using the MethodInjectorBuilder
+  //
+  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildCall<Method1::Builder>();
+  
+  // Call the function!
+  //
+  inv1(...);
+```
+
+The method injector builder passes the *this* parameter of the arguments as the first parameter of the function (it is not possible to inject a method as a method!). This allows a function which is not part of a class to look as if it is.
+
+
+Return Packers
+---------------------
+By default, Reflect support two types of returns: single return values:
+```cpp
+float floatReturner();
+bool boolReturner();
+```
+And multiple return values:
+```cpp
+std::tuple<float, int, double> multiReturner();
+```
+Both types of functions call `InvocationBuilder::packReturn` once per return value.
+
+It is possible to implement more specialised return packers by specialising `ReturnPacker`
+```cpp
+template <typename T, typename InvHelper> class ReturnPacker;
+```
+For example, you could wrap `std::optional<T>` to return a null value or a typed argument depending on if it is specified.
+
 
 Using Crate to box and unbox classes
 ---------------------
@@ -102,55 +177,6 @@ public:
 ```
 
 There is some further Glue required to put Crate and Reflect together. This Glue may need to consider POD types differently, and enable transforming references and pointers for the InvocationBuilder. An example of this can be found in `example/Default/Builder.h` which provides boxing for the Reflect and Crate unit tests.
-
-Fake Methods
----------------------
-Methods don't always exist on the class that is being wrapped, but it is convenient to present a function as a class method.
-
-For example, this function:
-```cpp
-void someFakeMethod(SomeClass &thsValue, float arg1, int arg2);
-```
-
-For example, can be *faked* as a method using:
-```cpp
-  // Specify which class is being wrapped
-  //
-  REFLECT_FUNCTION_HELPER(Test);
-  
-  // Generate a wrapper for the testFunction
-  //
-  typedef REFLECT_METHOD(testFunction) Method1;
-  
-  // Create a new function to invoke testFunction, using the MethodInjectorBuilder
-  //
-  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildCall<Method1::Builder>();
-  
-  // Call the function!
-  //
-  inv1(...);
-```
-
-The method injector builder passes the *this* parameter of the arguments as the first parameter of the function (it is not possible to inject a method as a method!). This allows a function which is not part of a class to look as if it is.
-
-Return Packers
----------------------
-By default, Reflect support two types of returns: single return values:
-```cpp
-float floatReturner();
-bool boolReturner();
-```
-And multiple return values:
-```cpp
-std::tuple<float, int, double> multiReturner();
-```
-Both types of functions call `InvocationBuilder::packReturn` once per return value.
-
-It is possible to implement more specialised return packers by specialising `ReturnPacker`
-```cpp
-template <typename T, typename InvHelper> class ReturnPacker;
-```
-For example, you could wrap `std::optional<T>` to return a null value or a typed argument depending on if it is specified.
 
 Writing an InvocationBuilder
 ---------------------
