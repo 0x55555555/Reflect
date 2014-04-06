@@ -224,6 +224,32 @@ template <> class Caster<const double &> : public PodCaster<double> { };
 template <> class Caster<const int &> : public PodCaster<int> { };
 template <> class Caster<const bool &> : public PodCaster<bool> { };
 
+template <> class Caster<const char *>
+  {
+public:
+  typedef const char *Result;
+
+  static bool canCast(Boxer *, Object *o)
+    {
+    return o && o->type == Crate::findType<char *>();
+    }
+
+  static const char *cast(Boxer *b, Object *o)
+    {
+    if (!canCast(b, o))
+      {
+      throw Crate::TypeException(Crate::findType<char *>(), o ? o->type : nullptr);
+      }
+    return (char*)o->d;
+    }
+
+  static void pack(Boxer *, Object *o, const char *t)
+    {
+    o->d = (uint8_t*)t;
+    o->type = Crate::findType<char *>();
+    }
+  };
+
 template <typename A, typename B, typename C> static void initArgs(
     Boxer *boxer,
     Object (&arr)[3],
@@ -273,7 +299,7 @@ public:
   class Arguments
     {
   public:
-    Arguments(Object **a, std::size_t c, Object *t)
+    Arguments(Object **a = nullptr, std::size_t c = 0, Object *t = nullptr)
         : args(a), argCount(c), ths(t), resultCount(0)
       {
       }
