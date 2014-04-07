@@ -135,8 +135,8 @@ public:
 
     union
     {
-        void *in;
-        T *out;
+      void *in;
+      T *out;
     } conv;
     conv.in = &o->d;
 
@@ -147,8 +147,8 @@ public:
     {
     union
     {
-        void *in;
-        T *out;
+      void *in;
+      T *out;
     } conv;
 
     o->type = Crate::findType<T>();
