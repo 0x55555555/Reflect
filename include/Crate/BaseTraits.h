@@ -41,6 +41,7 @@ public:
   template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)
     {
     T *mem = Derived::unbox(ifc, data);
+    (void)mem;
     mem->~T();
     }
 

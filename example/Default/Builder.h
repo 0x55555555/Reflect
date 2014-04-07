@@ -304,13 +304,15 @@ public:
       {
       }
 
-    Arguments(const Arguments &) = delete;
     Object **args;
     std::size_t argCount;
     Object *ths;
 
     Object results[10];
     std::size_t resultCount;
+
+  private:
+    Arguments(const Arguments &);
     };
 
   struct Call

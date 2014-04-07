@@ -33,7 +33,7 @@ template <typename InvHelper> class CanCallHelper
 public:
   template <typename Args> static bool canCast(typename InvHelper::CallData data)
     {
-    if (InvHelper::getArgumentCount(data) < std::tuple_size<Args>::value)
+    if (InvHelper::getArgumentCount(data) != std::tuple_size<Args>::value)
       {
       return false;
       }
