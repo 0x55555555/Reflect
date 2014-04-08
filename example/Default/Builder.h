@@ -66,11 +66,14 @@ public:
       {
       cleanup(boxer, this);
       delete [] d;
+      d = nullptr;
+      cleanup = nullptr;
       }
     }
 
 private:
   Object(const Object &);
+  Object& operator=(const Object &);
   };
 
 class Boxer
