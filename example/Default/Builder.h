@@ -98,6 +98,9 @@ public:
 
   void initialise(Object *o, const Crate::Type *t, Object::Cleanup c)
     {
+    assert(!o->type);
+    assert(!o->cleanup);
+    assert(!o->boxer);
     o->type = t;
     o->boxer = this;
     o->cleanup = c;

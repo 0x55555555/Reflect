@@ -30,7 +30,7 @@ public:
     ifc->initialise(data, Base::getType(), Base::template cleanup<Box>);
 
     T *memory = getMemory(ifc, data);
-    *memory = *dataIn;
+    new(memory) T(*dataIn);
     }
   };
 

@@ -38,7 +38,7 @@ public:
   /// \param data The data containing the arguments which are passed to the function.
   template <typename InvHelper> static void call(typename InvHelper::CallData data)
     {
-    detail::FunctionSelectorCanCallHelper<InvHelper, Selection> helper(data);
+    detail::FunctionSelectorHelper<InvHelper, Selection> helper(data);
     tupleEach<Selection>(helper);
 
     if (!helper.m_foundCall)
