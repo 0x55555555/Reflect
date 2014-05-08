@@ -59,7 +59,8 @@ public:
 template <typename A,
           typename B,
           typename C=detail::NilFunction,
-          typename D=detail::NilFunction> class FunctionArgumentCountSelector
+          typename D=detail::NilFunction,
+          typename E=detail::NilFunction> class FunctionArgumentCountSelector
   {
 public:
   typedef FunctionArgumentCountSelector<A, B, C, D> ThisType;
@@ -67,12 +68,14 @@ public:
   typedef std::tuple<A, B> Selection2;
   typedef std::tuple<A, B, C> Selection3;
   typedef std::tuple<A, B, C, D> Selection4;
+  typedef std::tuple<A, B, C, D, E> Selection5;
 
-  typedef std::tuple<Selection2, Selection3, Selection4> SelectionOptions;
+  typedef std::tuple<Selection2, Selection3, Selection4, Selection5> SelectionOptions;
 
   typedef std::integral_constant<size_t, std::is_same<C, detail::NilFunction>::value ? 2
                                        : std::is_same<D, detail::NilFunction>::value ? 3
-                                       : 4> Index;
+                                       : std::is_same<E, detail::NilFunction>::value ? 4
+                                       : 5> Index;
 
   typedef typename std::tuple_element<Index::value-2, SelectionOptions>::type Selection;
 

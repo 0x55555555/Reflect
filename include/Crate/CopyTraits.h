@@ -9,7 +9,7 @@ template <typename T> class CopyTraits : public BaseTraits<T, CopyTraits<T>>
   {
 public:
   typedef std::integral_constant<size_t, sizeof(T)> TypeSize;
-  typedef std::integral_constant<size_t, std::alignment_of<T>::value> TypeAlignment;
+  typedef std::integral_constant<size_t, detail::alignment_of<T>::value> TypeAlignment;
 
   typedef BaseTraits<T, CopyTraits<T>> Base;
 
