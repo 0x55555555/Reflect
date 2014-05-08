@@ -1,6 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include <string>
+#include <stdint.h>
 #include "TupleEach.h"
 
 namespace Reflect
@@ -125,7 +126,7 @@ public:
       : m_expected(expected),
         m_actual(actual)
     {
-    m_error = "Expected " + std::to_string(m_expected) + " argments,  got " + std::to_string(m_actual) + "";
+    m_error = "Expected " + std::to_string((uint64_t)m_expected) + " argments,  got " + std::to_string((uint64_t)m_actual) + "";
     }
 
   ~ArgCountException() throw()
