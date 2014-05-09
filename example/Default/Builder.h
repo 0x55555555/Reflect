@@ -171,7 +171,8 @@ public:
 
   static bool canCast(Boxer *boxer, const Object *o)
     {
-    return Caster<T *>::canCast(boxer, o) && ClassTraits::unbox(boxer, o) != nullptr;
+    auto obj = const_cast<Object*>(o);
+    return Caster<T *>::canCast(boxer, obj) && ClassTraits::unbox(boxer, obj) != nullptr;
     }
 
   static T &cast(Boxer *b, Object *o)
@@ -216,7 +217,23 @@ public:
   };
 
 template <typename T> class Caster<T &> : public Caster<T> { };
-template <typename T> class Caster<const T> : public Caster<T> { };
+template <typename T> class Caster<const T> : public Caster<T>
+  {
+public:
+  static void pack(Boxer *b, Object *o, const T &t)
+    {
+    Caster<T>::pack(b, o, const_cast<T &>(t));
+    }
+  };
+
+template <typename T> class Caster<const T *> : public Caster<T *>
+  {
+  public:
+    static void pack(Boxer *b, Object *o, const T *t)
+    {
+    Caster<T *>::pack(b, o, const_cast<T *>(t));
+    }
+  };
 
 template <> class Caster<void *> { };
 
@@ -253,6 +270,32 @@ public:
     {
     o->d = (uint8_t*)t;
     o->type = Crate::findType<char *>();
+    }
+  };
+
+template <> class Caster<const wchar_t *>
+  {
+  public:
+  typedef const wchar_t *Result;
+
+  static bool canCast(Boxer *, Object *o)
+    {
+    return o && o->type == Crate::findType<wchar_t *>();
+    }
+
+  static const wchar_t *cast(Boxer *b, Object *o)
+    {
+    if (!canCast(b, o))
+      {
+      throw Crate::TypeException(Crate::findType<wchar_t *>(), o ? o->type : nullptr);
+      }
+    return (wchar_t*)o->d;
+    }
+
+  static void pack(Boxer *, Object *o, const wchar_t *t)
+    {
+    o->d = (uint8_t*)t;
+    o->type = Crate::findType<wchar_t *>();
     }
   };
 

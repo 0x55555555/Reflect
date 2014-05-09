@@ -20,7 +20,7 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     typedef typename FunctionHelper::Arguments Args;
 
     // Call the function, unpacking arguments, collect the return.
-    auto result = FunctionHelper::template call<Fn, InvHelper>(
+    auto&& result = FunctionHelper::template call<Fn, InvHelper>(
       data
       REFLEX_TEMPLATE_UNPACK(UNPACK_HELPER)
       );

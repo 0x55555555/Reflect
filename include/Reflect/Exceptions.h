@@ -82,7 +82,7 @@ public:
         options += ", ";
         }
 
-      options += std::to_string(Count::value);
+      options += std::to_string((uint64_t)Count::value);
       return false;
       }
 
