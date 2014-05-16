@@ -14,7 +14,7 @@ install:
   - sudo add-apt-repository --yes ppa:arigy/xfce
   - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
   - sudo apt-get update
-  - sudo apt-get install qt5-default clang
+  - sudo apt-get install clang
   - cd test
   - qmake -spec ${SPEC} "CONFIG += ${VARIANT}\n${QMAKE_EXTRA}"
 
