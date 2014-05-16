@@ -41,9 +41,9 @@ public:
   typedef typename Fwd::CallData CallData;
   typedef typename Fwd::Result Result;
 
-  template <typename Builder> static Result buildCall()
+  template <typename Builder, typename SubType> static Result buildCall()
     {
-    return Fwd::template buildCall<Builder, MethodInjectorBuilder<Fwd>>();
+    return Fwd::template buildCall<Builder, SubType>();
     }
 
   static std::string describeArguments(CallData args)

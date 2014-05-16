@@ -1,5 +1,6 @@
 #pragma once
 #include "Crate/BaseTraits.h"
+#include <type_traits>
 
 namespace Crate
 {
@@ -13,7 +14,7 @@ template <typename T, typename Parent, typename Root> class DerivedTraits : publ
   {
 public:
   typedef std::integral_constant<size_t, sizeof(T)> TypeSize;
-  typedef std::integral_constant<size_t, std::alignment_of<T>::value> TypeAlignment;
+  typedef std::integral_constant<size_t, detail::alignment_of<T>::value> TypeAlignment;
 
   typedef BaseTraits<T, DerivedTraits<T, Parent, Root>> BaseClassTraits;
   typedef Traits<Root> RootTraits;

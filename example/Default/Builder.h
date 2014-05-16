@@ -66,11 +66,14 @@ public:
       {
       cleanup(boxer, this);
       delete [] d;
+      d = nullptr;
+      cleanup = nullptr;
       }
     }
 
 private:
   Object(const Object &);
+  Object& operator=(const Object &);
   };
 
 class Boxer
@@ -95,6 +98,9 @@ public:
 
   void initialise(Object *o, const Crate::Type *t, Object::Cleanup c)
     {
+    assert(!o->type);
+    assert(!o->cleanup);
+    assert(!o->boxer);
     o->type = t;
     o->boxer = this;
     o->cleanup = c;
@@ -135,8 +141,8 @@ public:
 
     union
     {
-        void *in;
-        T *out;
+      void *in;
+      T *out;
     } conv;
     conv.in = &o->d;
 
@@ -147,8 +153,8 @@ public:
     {
     union
     {
-        void *in;
-        T *out;
+      void *in;
+      T *out;
     } conv;
 
     o->type = Crate::findType<T>();
@@ -165,7 +171,8 @@ public:
 
   static bool canCast(Boxer *boxer, const Object *o)
     {
-    return Caster<T *>::canCast(boxer, o) && ClassTraits::unbox(boxer, o) != nullptr;
+    auto obj = const_cast<Object*>(o);
+    return Caster<T *>::canCast(boxer, obj) && ClassTraits::unbox(boxer, obj) != nullptr;
     }
 
   static T &cast(Boxer *b, Object *o)
@@ -210,7 +217,23 @@ public:
   };
 
 template <typename T> class Caster<T &> : public Caster<T> { };
-template <typename T> class Caster<const T> : public Caster<T> { };
+template <typename T> class Caster<const T> : public Caster<T>
+  {
+public:
+  static void pack(Boxer *b, Object *o, const T &t)
+    {
+    Caster<T>::pack(b, o, const_cast<T &>(t));
+    }
+  };
+
+template <typename T> class Caster<const T *> : public Caster<T *>
+  {
+  public:
+    static void pack(Boxer *b, Object *o, const T *t)
+    {
+    Caster<T *>::pack(b, o, const_cast<T *>(t));
+    }
+  };
 
 template <> class Caster<void *> { };
 
@@ -223,6 +246,58 @@ template <> class Caster<const float &> : public PodCaster<float> { };
 template <> class Caster<const double &> : public PodCaster<double> { };
 template <> class Caster<const int &> : public PodCaster<int> { };
 template <> class Caster<const bool &> : public PodCaster<bool> { };
+
+template <> class Caster<const char *>
+  {
+public:
+  typedef const char *Result;
+
+  static bool canCast(Boxer *, Object *o)
+    {
+    return o && o->type == Crate::findType<char *>();
+    }
+
+  static const char *cast(Boxer *b, Object *o)
+    {
+    if (!canCast(b, o))
+      {
+      throw Crate::TypeException(Crate::findType<char *>(), o ? o->type : nullptr);
+      }
+    return (char*)o->d;
+    }
+
+  static void pack(Boxer *, Object *o, const char *t)
+    {
+    o->d = (uint8_t*)t;
+    o->type = Crate::findType<char *>();
+    }
+  };
+
+template <> class Caster<const wchar_t *>
+  {
+  public:
+  typedef const wchar_t *Result;
+
+  static bool canCast(Boxer *, Object *o)
+    {
+    return o && o->type == Crate::findType<wchar_t *>();
+    }
+
+  static const wchar_t *cast(Boxer *b, Object *o)
+    {
+    if (!canCast(b, o))
+      {
+      throw Crate::TypeException(Crate::findType<wchar_t *>(), o ? o->type : nullptr);
+      }
+    return (wchar_t*)o->d;
+    }
+
+  static void pack(Boxer *, Object *o, const wchar_t *t)
+    {
+    o->d = (uint8_t*)t;
+    o->type = Crate::findType<wchar_t *>();
+    }
+  };
 
 template <typename A, typename B, typename C> static void initArgs(
     Boxer *boxer,
@@ -273,18 +348,20 @@ public:
   class Arguments
     {
   public:
-    Arguments(Object **a, std::size_t c, Object *t)
+    Arguments(Object **a = nullptr, std::size_t c = 0, Object *t = nullptr)
         : args(a), argCount(c), ths(t), resultCount(0)
       {
       }
 
-    Arguments(const Arguments &) = delete;
     Object **args;
     std::size_t argCount;
     Object *ths;
 
     Object results[10];
     std::size_t resultCount;
+
+  private:
+    Arguments(const Arguments &);
     };
 
   struct Call
@@ -335,16 +412,21 @@ public:
       {
       }
 
-    template <std::size_t Idx> bool visit()
+    void append(std::size_t i, const Crate::Type *type)
       {
-      if (Idx > m_start)
+      if (i > m_start)
         {
         m_result += ", ";
         }
 
-      typedef typename std::tuple_element<Idx, Arguments>::type Element;
+      m_result += type->name();
+      }
 
-      m_result += Crate::findType<Element>()->name();
+    template <std::size_t Idx> bool visit()
+      {
+      typedef typename std::tuple_element<Idx, Arguments>::type Element;
+      append(Idx, Crate::findType<Element>());
+
       return false;
       }
 

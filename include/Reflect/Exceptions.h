@@ -1,5 +1,7 @@
 #pragma once
 #include <stdexcept>
+#include <string>
+#include <stdint.h>
 #include "TupleEach.h"
 
 namespace Reflect
@@ -71,7 +73,16 @@ public:
       typedef typename std::tuple_element<Idx, Tuple>::type ElementType;
       typedef typename ElementType::Count Count;
 
-      options += std::to_string(Count::value) + "\n";
+      if (Idx == std::tuple_size<Tuple>::value-1)
+        {
+        options += " or ";
+        }
+      else if (Idx != 0)
+        {
+        options += ", ";
+        }
+
+      options += std::to_string((uint64_t)Count::value);
       return false;
       }
 
@@ -86,7 +97,7 @@ public:
     OverloadHelper<InvHelper, typename Overloads::Selection> helper;
     tupleEach<typename Overloads::Selection>(helper);
 
-    excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'\nPossibilities are: " + helper.options;
+    excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'\nPossibilities are functions taking " + helper.options + " arguments";
     return excep;
     }
 
@@ -115,7 +126,7 @@ public:
       : m_expected(expected),
         m_actual(actual)
     {
-    m_error = "Expected " + std::to_string(m_expected) + " argments,  got " + std::to_string(m_actual) + "";
+    m_error = "Expected " + std::to_string((uint64_t)m_expected) + " argments,  got " + std::to_string((uint64_t)m_actual) + "";
     }
 
   ~ArgCountException() throw()

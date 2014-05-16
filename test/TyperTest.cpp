@@ -1,7 +1,6 @@
 #include "ReflectTest.h"
 #include "Crate/Traits.h"
 #include <memory>
-#include <QtTest>
 #include "../example/Default/Builder.h"
 
 static int ctorCount = 0;

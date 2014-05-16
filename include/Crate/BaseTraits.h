@@ -41,6 +41,7 @@ public:
   template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)
     {
     T *mem = Derived::unbox(ifc, data);
+    (void)mem;
     mem->~T();
     }
 
@@ -53,5 +54,33 @@ public:
     }
 
   };
+
+namespace detail
+{
+
+template<class T, bool Abstract=std::is_abstract<T>::value>
+struct align_helper
+{
+  T _Elt0;
+  char _Elt1;
+  T _Elt2;
+
+  align_helper();
+  ~align_helper();
+};
+
+template<class T>
+struct align_helper<T, true>
+{
+};
+
+#define CRATE_ALIGN_HELPER(T) (sizeof (align_helper<T>) - 2 * sizeof (T))
+
+  template<class T>
+  struct alignment_of : std::integral_constant<size_t, CRATE_ALIGN_HELPER(typename std::remove_reference<T>::type)> { };
+
+#undef CRATE_ALIGN_HELPER
+
+}
 
 }

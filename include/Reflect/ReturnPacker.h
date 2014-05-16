@@ -48,7 +48,8 @@ public:
 
   static void pack(typename InvHelper::CallData data, Tuple &&result)
     {
-    tupleEach<TuplePackerHelper>(TuplePackerHelper<Tuple, InvHelper>(&result, data));
+    TuplePackerHelper<Tuple, InvHelper> helper(result, data);
+    tupleEach<Tuple>(helper);
     }
   };
 

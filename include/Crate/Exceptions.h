@@ -62,7 +62,7 @@ public:
       : TypeException(t),
         m_index(index)
     {
-    m_error = "Expected '" + expected()->name() + "' got '" + actual()->name() + "' for argument " + std::to_string(index) + " parameter.";
+    m_error = "Expected '" + expected()->name() + "' got '" + actual()->name() + "' for argument " + std::to_string((uint64_t)index) + " parameter.";
     }
 
   ~ArgException() throw()

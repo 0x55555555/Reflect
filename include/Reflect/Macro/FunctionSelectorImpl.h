@@ -17,20 +17,32 @@ struct NilFunction
 template <typename A,
           typename B,
           typename C=detail::NilFunction,
-          typename D=detail::NilFunction> class FunctionArgumentTypeSelector
+          typename D=detail::NilFunction,
+          typename E=detail::NilFunction,
+          typename F=detail::NilFunction,
+          typename G=detail::NilFunction,
+          typename H=detail::NilFunction> class FunctionArgumentTypeSelector
   {
 public:
-  typedef FunctionArgumentTypeSelector<A, B, C, D> ThisType;
+  typedef FunctionArgumentTypeSelector<A, B, C, D, E, F, G, H> ThisType;
 
   typedef std::tuple<A, B> Selection2;
   typedef std::tuple<A, B, C> Selection3;
   typedef std::tuple<A, B, C, D> Selection4;
+  typedef std::tuple<A, B, C, D, E> Selection5;
+  typedef std::tuple<A, B, C, D, E, F> Selection6;
+  typedef std::tuple<A, B, C, D, E, F, G> Selection7;
+  typedef std::tuple<A, B, C, D, E, F, G, H> Selection8;
 
-  typedef std::tuple<Selection2, Selection3, Selection4> SelectionOptions;
+  typedef std::tuple<Selection2, Selection3, Selection4, Selection5, Selection6, Selection7, Selection8> SelectionOptions;
 
   typedef std::integral_constant<size_t, std::is_same<C, detail::NilFunction>::value ? 2
                                        : std::is_same<D, detail::NilFunction>::value ? 3
-                                       : 4> Index;
+                                       : std::is_same<E, detail::NilFunction>::value ? 4
+                                       : std::is_same<F, detail::NilFunction>::value ? 5
+                                       : std::is_same<G, detail::NilFunction>::value ? 6
+                                       : std::is_same<H, detail::NilFunction>::value ? 7
+                                       : 8> Index;
 
   typedef typename std::tuple_element<Index::value-2, SelectionOptions>::type Selection;
 
@@ -38,7 +50,7 @@ public:
   /// \param data The data containing the arguments which are passed to the function.
   template <typename InvHelper> static void call(typename InvHelper::CallData data)
     {
-    detail::FunctionSelectorCanCallHelper<InvHelper, Selection> helper(data);
+    detail::FunctionSelectorHelper<InvHelper, Selection> helper(data);
     tupleEach<Selection>(helper);
 
     if (!helper.m_foundCall)
@@ -59,7 +71,11 @@ public:
 template <typename A,
           typename B,
           typename C=detail::NilFunction,
-          typename D=detail::NilFunction> class FunctionArgumentCountSelector
+          typename D=detail::NilFunction,
+          typename E=detail::NilFunction,
+          typename F=detail::NilFunction,
+          typename G=detail::NilFunction,
+          typename H=detail::NilFunction> class FunctionArgumentCountSelector
   {
 public:
   typedef FunctionArgumentCountSelector<A, B, C, D> ThisType;
@@ -67,12 +83,20 @@ public:
   typedef std::tuple<A, B> Selection2;
   typedef std::tuple<A, B, C> Selection3;
   typedef std::tuple<A, B, C, D> Selection4;
+  typedef std::tuple<A, B, C, D, E> Selection5;
+  typedef std::tuple<A, B, C, D, E, F> Selection6;
+  typedef std::tuple<A, B, C, D, E, F, G> Selection7;
+  typedef std::tuple<A, B, C, D, E, F, G, H> Selection8;
 
-  typedef std::tuple<Selection2, Selection3, Selection4> SelectionOptions;
+  typedef std::tuple<Selection2, Selection3, Selection4, Selection5, Selection6, Selection7, Selection8> SelectionOptions;
 
   typedef std::integral_constant<size_t, std::is_same<C, detail::NilFunction>::value ? 2
                                        : std::is_same<D, detail::NilFunction>::value ? 3
-                                       : 4> Index;
+                                       : std::is_same<E, detail::NilFunction>::value ? 4
+                                       : std::is_same<F, detail::NilFunction>::value ? 5
+                                       : std::is_same<G, detail::NilFunction>::value ? 6
+                                       : std::is_same<H, detail::NilFunction>::value ? 7
+                                       : 8> Index;
 
   typedef typename std::tuple_element<Index::value-2, SelectionOptions>::type Selection;
 

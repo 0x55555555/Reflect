@@ -36,10 +36,57 @@ template <size_t ArgCount, typename InvHelper, typename FunctionHelper, typename
 #undef REFLEX_TEMPLATE_UNPACK
 #undef REFLEX_TEMPLATE_UNPACK_COMMA
 
-
 #define REFLEX_TEMPLATE_COUNT 3
 #define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2)
 #define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2)
+#include "Reflect/Macro/FunctionBuilderImplTemplate.h"
+#undef REFLEX_TEMPLATE_COUNT
+#undef REFLEX_TEMPLATE_UNPACK
+#undef REFLEX_TEMPLATE_UNPACK_COMMA
+
+#define REFLEX_TEMPLATE_COUNT 4
+#define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2) MACRO(3)
+#define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2), MACRO(3)
+#include "Reflect/Macro/FunctionBuilderImplTemplate.h"
+#undef REFLEX_TEMPLATE_COUNT
+#undef REFLEX_TEMPLATE_UNPACK
+#undef REFLEX_TEMPLATE_UNPACK_COMMA
+
+#define REFLEX_TEMPLATE_COUNT 5
+#define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2) MACRO(3) MACRO(4)
+#define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2), MACRO(3), MACRO(4)
+#include "Reflect/Macro/FunctionBuilderImplTemplate.h"
+#undef REFLEX_TEMPLATE_COUNT
+#undef REFLEX_TEMPLATE_UNPACK
+#undef REFLEX_TEMPLATE_UNPACK_COMMA
+
+#define REFLEX_TEMPLATE_COUNT 6
+#define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2) MACRO(3) MACRO(4) MACRO(5)
+#define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2), MACRO(3), MACRO(4), MACRO(5)
+#include "Reflect/Macro/FunctionBuilderImplTemplate.h"
+#undef REFLEX_TEMPLATE_COUNT
+#undef REFLEX_TEMPLATE_UNPACK
+#undef REFLEX_TEMPLATE_UNPACK_COMMA
+
+#define REFLEX_TEMPLATE_COUNT 7
+#define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2) MACRO(3) MACRO(4) MACRO(5) MACRO(6)
+#define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2), MACRO(3), MACRO(4), MACRO(5), MACRO(6)
+#include "Reflect/Macro/FunctionBuilderImplTemplate.h"
+#undef REFLEX_TEMPLATE_COUNT
+#undef REFLEX_TEMPLATE_UNPACK
+#undef REFLEX_TEMPLATE_UNPACK_COMMA
+
+#define REFLEX_TEMPLATE_COUNT 8
+#define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2) MACRO(3) MACRO(4) MACRO(5) MACRO(6) MACRO(7)
+#define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2), MACRO(3), MACRO(4), MACRO(5), MACRO(6), MACRO(7)
+#include "Reflect/Macro/FunctionBuilderImplTemplate.h"
+#undef REFLEX_TEMPLATE_COUNT
+#undef REFLEX_TEMPLATE_UNPACK
+#undef REFLEX_TEMPLATE_UNPACK_COMMA
+
+#define REFLEX_TEMPLATE_COUNT 9
+#define REFLEX_TEMPLATE_UNPACK(MACRO) MACRO(0) MACRO(1) MACRO(2) MACRO(3) MACRO(4) MACRO(5) MACRO(6) MACRO(7) MACRO(8)
+#define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO) MACRO(0), MACRO(1), MACRO(2), MACRO(3), MACRO(4), MACRO(5), MACRO(6), MACRO(7), MACRO(8)
 #include "Reflect/Macro/FunctionBuilderImplTemplate.h"
 #undef REFLEX_TEMPLATE_COUNT
 #undef REFLEX_TEMPLATE_UNPACK
@@ -71,7 +118,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
       Fn,
       typename Helper::ReturnType> CallDispatch;
 
-    if (InvHelper::getArgumentCount(data) < std::tuple_size<typename Helper::Arguments>::value)
+    if (InvHelper::getArgumentCount(data) != (std::size_t)ArgCount::value)
       {
       throw ArgCountException(
         std::tuple_size<typename Helper::Arguments>::value,
