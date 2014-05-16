@@ -221,7 +221,7 @@ void ReflectTest::methodInjectionTest()
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildCall<Fn::Builder>();
+  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildCall<Fn::Builder, MethodInjectorBuilder<InvocationBuilder>>();
 
   Reflect::example::Boxer boxer;
 
