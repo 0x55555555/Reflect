@@ -1,4 +1,5 @@
 #pragma once
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
 #include "QObject"
 
 class ReflectTest : public QObject
