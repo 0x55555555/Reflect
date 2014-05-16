@@ -4,7 +4,6 @@
 #include "Reflect/WrappedFunction.h"
 #include "Reflect/FunctionSelector.h"
 #include "../example/Default/Builder.h"
-#include <QtTest>
 #include <tuple>
 
 #define FLOAT_VAL 5.0f
@@ -555,4 +554,8 @@ void ReflectTest::overloadingTest()
 
   }
 
-QTEST_APPLESS_MAIN(ReflectTest)
+int main(int argc, char *argv[])
+{
+    ReflectTest tc;
+    return QTest::qExec(&tc, argc, argv);
+}

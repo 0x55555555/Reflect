@@ -2,7 +2,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QObject>
-#include <QtTest>
+#include <qtestcase.h>
 #pragma clang diagnostic pop
 
 class ReflectTest : public QObject
