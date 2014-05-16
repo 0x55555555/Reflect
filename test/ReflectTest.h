@@ -1,6 +1,9 @@
 #pragma once
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
-#include "QObject"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+#include <QObject>
+#include <QtTest>
+#pragma clang diagnostic pop
 
 class ReflectTest : public QObject
   {
