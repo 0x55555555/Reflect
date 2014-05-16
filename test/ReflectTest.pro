@@ -66,4 +66,5 @@ HEADERS += \
     ../include/Crate/ReferenceNonCleanedTraits.h \
     ../include/Crate/DerivedTraits.h \
     ../include/Crate/Exceptions.h \
-    ../example/Default/Builder.h
+    ../example/Default/Builder.h \
+    ../include/Reflect/Reflect.h
