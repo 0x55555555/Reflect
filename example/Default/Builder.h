@@ -96,14 +96,14 @@ public:
     return o->d;
     }
 
-  void initialise(Object *o, const Crate::Type *t, Object::Cleanup c)
+  template <Object::Cleanup Cln> void initialise(Object *o, const Crate::Type *t)
     {
     assert(!o->type);
     assert(!o->cleanup);
     assert(!o->boxer);
     o->type = t;
     o->boxer = this;
-    o->cleanup = c;
+    o->cleanup = Cln;
     }
 
   template <typename Traits> std::unique_ptr<Object> create()

@@ -12,6 +12,7 @@ template <size_t ArgCount, typename InvHelper, typename FunctionHelper, typename
 }
 }
 
+
 #define REFLEX_TEMPLATE_COUNT 0
 #define REFLEX_TEMPLATE_UNPACK(MACRO)
 #define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO)

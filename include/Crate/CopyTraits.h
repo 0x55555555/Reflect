@@ -27,7 +27,7 @@ public:
 
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, const T *dataIn)
     {
-    ifc->initialise(data, Base::getType(), Base::template cleanup<Box>);
+    ifc->initialise<Base::template cleanup<Box>>(data, Base::getType());
 
     T *memory = getMemory(ifc, data);
     new(memory) T(*dataIn);
