@@ -104,7 +104,7 @@ public:
   /// \param data The data containing the arguments which are passed to the function.
   template <typename InvHelper> static void call(typename InvHelper::CallData data)
     {
-    detail::FunctionArgCountSelectorHelper<InvHelper, Selection> helper(InvHelper::getArgumentCount(data), data);
+    detail::FunctionArgCountSelectorHelper<InvHelper, Selection> helper(InvHelper::getArgumentCountWithThis(data), data);
     tupleEach<Selection>(helper);
 
     if (!helper.m_foundCall)
@@ -115,7 +115,7 @@ public:
 
   template <typename InvHelper> static bool canCall(typename InvHelper::CallData data)
     {
-    detail::FunctionArgCountSelectorCanCallHelper<InvHelper, Selection> helper(InvHelper::getArgumentCount(data));
+    detail::FunctionArgCountSelectorCanCallHelper<InvHelper, Selection> helper(InvHelper::getArgumentCountWithThis(data, true));
     tupleEach<Selection>(helper);
     return helper.m_foundCall;
     }

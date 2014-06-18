@@ -32,6 +32,11 @@ public:
     return static_cast<T*>(*RootTraits::getMemory(ifc, data));
     }
 
+  template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)
+    {
+    Traits<Root>::cleanup(ifc, data);
+    }
+  
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
     {
     return RootTraits::box(ifc, data, dataIn);

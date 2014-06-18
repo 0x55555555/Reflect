@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Reflect.h"
+#include "Reflect/Reflect.h"
 
 #ifdef REFLECT_MACRO_IMPL
 # include "Reflect/Macro/FunctionBuilderImpl.h"

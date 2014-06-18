@@ -41,10 +41,15 @@ public:
   typedef typename Fwd::CallData CallData;
   typedef typename Fwd::Result Result;
 
-  template <typename Builder, typename SubType> static Result buildCall()
-    {
-    return Fwd::template buildCall<Builder, SubType>();
-    }
+  template <typename Builder, typename SubType> static Result buildWrappedCall()
+  {
+    return Fwd::template buildWrappedCall<Builder, SubType>();
+  }
+
+  template <typename Builder, typename SubType> static Result buildWrappedCanCall()
+  {
+    return Fwd::template buildWrappedCanCall<Builder, SubType>();
+  }
 
   static std::string describeArguments(CallData args)
     {
