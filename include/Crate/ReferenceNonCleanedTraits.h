@@ -34,7 +34,7 @@ public:
 
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
     {
-    if (ifc->initialise<ReferenceNonCleanedTraits<T>, T, cleanup<Box>>(data, Base::getType(), dataIn) == AlreadyInitialised)
+    if (ifc->template initialise<ReferenceNonCleanedTraits<T>, T, cleanup<Box>>(data, Base::getType()) == Base::AlreadyInitialised)
       {
       return;
       }

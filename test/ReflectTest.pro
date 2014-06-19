@@ -67,4 +67,5 @@ HEADERS += \
     ../include/Crate/DerivedTraits.h \
     ../include/Crate/Exceptions.h \
     ../example/Default/Builder.h \
-    ../include/Reflect/Reflect.h
+    ../include/Reflect/Reflect.h \
+    CrateTypeHelper.h

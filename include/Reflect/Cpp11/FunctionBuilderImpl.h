@@ -76,11 +76,13 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     // The correct dispatcher - based on the ReturnType.
     typedef ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
 
-    if (InvHelper::getArgumentCount(data) != (std::size_t)TupleSize::value)
+    typedef typename Helper::Static Static;
+    const std::size_t expectedArgument = (std::size_t)TupleSize::value + (Static::value ? 0 : 1);
+    if (InvHelper::getArgumentCountWithThis(data) != expectedArgument)
       {
       throw ArgCountException(
-        std::tuple_size<typename Helper::Arguments>::value,
-        InvHelper::getArgumentCount(data));
+        expectedArgument,
+        InvHelper::getArgumentCountWithThis(data));
       }
 
     // call the function.
@@ -89,7 +91,8 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
 
   template <typename InvHelper> static bool canCall(typename InvHelper::CallData data)
     {
-    return detail::CanCallHelper<InvHelper>::template canCast<typename Helper::Arguments>(data) &&
+    typedef typename Helper::Static Static;
+    return detail::CanCallHelper<InvHelper>::template canCast<typename Helper::Arguments, Static::value>(data) &&
         Helper::template canCastThis<InvHelper>(data);
     }
   };

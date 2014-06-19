@@ -35,8 +35,8 @@ template <typename InvHelper> class CanCallHelper
 public:
   template <typename Args, bool Static> static bool canCast(typename InvHelper::CallData data)
     {
-    size_t expectedArgCount = std::tuple_size<Args>::value + Static ? 0 : 1;
-    if (InvHelper::getArgumentCountWithThis(data) != std::tuple_size<Args>::value)
+    size_t expectedArgCount = std::tuple_size<Args>::value + (Static ? 0 : 1);
+    if (InvHelper::getArgumentCountWithThis(data) != expectedArgCount)
       {
       return false;
       }

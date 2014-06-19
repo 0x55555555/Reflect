@@ -96,7 +96,7 @@ public:
     return o->d;
     }
 
-  template <Object::Cleanup Cln> void initialise(Object *o, const Crate::Type *t)
+  template <typename Traits, typename T, Object::Cleanup Cln> typename Traits::InitialiseTypes initialise(Object *o, const Crate::Type *t)
     {
     assert(!o->type);
     assert(!o->cleanup);
@@ -104,6 +104,8 @@ public:
     o->type = t;
     o->boxer = this;
     o->cleanup = Cln;
+
+    return Traits::Initialised;
     }
 
   template <typename Traits> std::unique_ptr<Object> create()
@@ -442,9 +444,9 @@ public:
     return Crate::findType<Class>()->name() + " ->( " + helper.m_result + " )";
     }
 
-  static std::size_t getArgumentCount(CallData args)
+  static std::size_t getArgumentCountWithThis(CallData args)
     {
-    return args->args->argCount;
+    return args->args->argCount + (args->args->ths ? 1 : 0);
     }
 
   template <typename T> static T unpackThis(CallData args)
@@ -467,6 +469,11 @@ public:
   template <std::size_t I, typename Arg>
       static typename Caster<Arg>::Result unpackArgument(CallData data)
     {
+    if (data->args->argCount <= I)
+      {
+      throw Reflect::ArgCountException(I, data->args->argCount);
+      }
+
     try
       {
       return Caster<Arg>::cast(data->boxer, data->args->args[I]);
@@ -478,8 +485,12 @@ public:
     }
 
   template <std::size_t I, typename Arg>
-      static bool canUnpackArgument(CallData data)
+      static bool canUnpackArgument(CallData data, bool)
     {
+    if (data->args->argCount <= I)
+      {
+      return false;
+      }
     return Caster<Arg>::canCast(data->boxer, data->args->args[I]);
     }
 
