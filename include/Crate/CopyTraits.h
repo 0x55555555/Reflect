@@ -34,7 +34,12 @@ public:
 
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, const T *dataIn)
     {
-    if (ifc->template initialise<CopyTraits<T>, T, cleanup<Box>>(data, Base::getType()) == Base::AlreadyInitialised)
+    const typename Base::InitialiseTypes initialised = Base::AlreadyInitialised;
+    typedef CopyTraits<T> ThisType;
+
+    auto type = Base::getType();
+
+    if (ifc->template initialise<ThisType, T, cleanup<Box>>(data, type) == initialised)
       {
       return;
       }
