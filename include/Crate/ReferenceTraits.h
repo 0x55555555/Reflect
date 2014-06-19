@@ -36,7 +36,7 @@ template <typename T> class ReferenceTraits : public BaseTraits<T, ReferenceTrai
   
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
     {
-    if (ifc->template initialise<ReferenceTraits<T>, T, cleanup<Box>>(data, Base::getType()) == Base::AlreadyInitialised)
+    if (ifc->template initialise<ReferenceTraits<T>, T>(data, Base::getType(), cleanup<Box>) == Base::AlreadyInitialised)
       {
       return;
       }
