@@ -12,6 +12,7 @@ template <size_t ArgCount, typename InvHelper, typename FunctionHelper, typename
 }
 }
 
+
 #define REFLEX_TEMPLATE_COUNT 0
 #define REFLEX_TEMPLATE_UNPACK(MACRO)
 #define REFLEX_TEMPLATE_UNPACK_COMMA(MACRO)
@@ -118,11 +119,14 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
       Fn,
       typename Helper::ReturnType> CallDispatch;
 
-    if (InvHelper::getArgumentCount(data) != (std::size_t)ArgCount::value)
+    std::size_t expectedArgs = (std::size_t)ArgCount::value + (Helper::Static::value ? 0 : 1);
+
+    typedef Helper::Static Static;
+    if (InvHelper::getArgumentCountWithThis(data) != expectedArgs)
       {
       throw ArgCountException(
-        std::tuple_size<typename Helper::Arguments>::value,
-        InvHelper::getArgumentCount(data));
+        expectedArgs,
+        InvHelper::getArgumentCountWithThis(data));
       }
 
     // call the function.
@@ -131,7 +135,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
 
   template <typename InvHelper> static bool canCall(typename InvHelper::CallData data)
     {
-    return detail::CanCallHelper<InvHelper>::template canCast<typename Helper::Arguments>(data) &&
+    return detail::CanCallHelper<InvHelper>::template canCast<typename Helper::Arguments, Helper::Static::value>(data) &&
         Helper::template canCastThis<InvHelper>(data);
     }
   };

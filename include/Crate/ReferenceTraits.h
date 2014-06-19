@@ -7,7 +7,9 @@ namespace Crate
 /// \brief ReferenceTraits stores a pointer of a class in memory owned by the receiver.
 template <typename T> class ReferenceTraits : public BaseTraits<T, ReferenceTraits<T>>
   {
-public:
+  public:
+  typedef std::integral_constant<bool, true> Managed;
+
   typedef std::integral_constant<size_t, sizeof(T*)> TypeSize;
   typedef std::integral_constant<size_t, std::alignment_of<T*>::value> TypeAlignment;
 
@@ -25,9 +27,19 @@ public:
     return *getMemory(ifc, data);
     }
 
+  template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)
+    {
+    T *mem = unbox(ifc, data);
+    (void)mem;
+    mem->~T();
+    }
+  
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
     {
-    ifc->initialise(data, Base::getType(), Base::template cleanup<Box>);
+    if (ifc->template initialise<ReferenceTraits<T>, T, cleanup<Box>>(data, Base::getType()) == Base::AlreadyInitialised)
+      {
+      return;
+      }
 
     T **memory = getMemory(ifc, data);
     *memory = dataIn;

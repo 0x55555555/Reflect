@@ -26,7 +26,7 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 win32-msvc2012 {
   # needs enabling for msvc2013, which has no mkspec yet...
   # QMAKE_CXXFLAGS += /FS
-  DEFINES += REFLECT_MACRO_IMPL
+  DEFINES += REFLECT_MACRO_IMPL _VARIADIC_MAX=10
 }
 
 macx-clang {
@@ -66,4 +66,6 @@ HEADERS += \
     ../include/Crate/ReferenceNonCleanedTraits.h \
     ../include/Crate/DerivedTraits.h \
     ../include/Crate/Exceptions.h \
-    ../example/Default/Builder.h
+    ../example/Default/Builder.h \
+    ../include/Reflect/Reflect.h \
+    CrateTypeHelper.h

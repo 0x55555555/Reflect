@@ -12,4 +12,27 @@ template <typename T> class Traits : public CopyTraits<T>
   {
   };
 
+
+template <> class Traits<void> : public BaseTraits<void, Traits<void>>
+  {
+public:
+  template <typename Box> static void **getMemory(Box *, typename Box::BoxedData)
+    {
+    return nullptr;
+    }
+
+  template<typename Box> static void *unbox(Box *, typename Box::BoxedData)
+    {
+    return nullptr;
+    }
+
+  template<typename Box> static void box(Box *, typename Box::BoxedData, void *)
+    {
+    }
+
+  template <typename Box> static void cleanup(Box *, typename Box::BoxedData)
+    {
+    }
+  };
+
 }

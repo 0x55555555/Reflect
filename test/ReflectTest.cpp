@@ -86,7 +86,8 @@ template <> struct TypeResolver<A>
   {
   static const Type *find()
     {
-    static Type t("A");
+    static Type t;
+    t.initialise<A>("A");
     return &t;
     }
   };
@@ -108,7 +109,7 @@ public:
     Signature fn;
     };
 
-  template <typename Function, typename Builder> static Result buildCall()
+  template <typename Function, typename Builder> static Result buildWrappedCall()
     {
     Result r = { call<Function, Builder> };
     return r;
@@ -220,7 +221,7 @@ void ReflectTest::methodInjectionTest()
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildCall<Fn::Builder, MethodInjectorBuilder<InvocationBuilder>>();
+  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildWrappedCall<Fn::Builder, MethodInjectorBuilder<InvocationBuilder>>();
 
   Reflect::example::Boxer boxer;
 
@@ -284,7 +285,7 @@ void ReflectTest::functionInvokeTest()
   InvocationBuilder::Arguments data1(args1, 2, thsValPtr);
   InvocationBuilder::Arguments data2(args2, 1, thsValPtr);
   InvocationBuilder::Arguments data2_1(args2, 1, 0);
-  InvocationBuilder::Arguments data3(args3, 1, thsValPtr);
+  InvocationBuilder::Arguments data3(args3, 1, 0);
 
   VERIFY_NO_THROWS([&]() {
     inv1.fn(&boxer, &data1);
@@ -296,7 +297,7 @@ void ReflectTest::functionInvokeTest()
     {
     inv1.fn(&boxer, &data2);
     };
-  VERIFY_THROWS(inv1WithArg2, const Reflect::ArgCountException &, Reflect::ArgCountException(2, 1));
+  VERIFY_THROWS(inv1WithArg2, const Reflect::ArgCountException &, Reflect::ArgCountException(3, 2));
 
   auto inv2WithArg1 = [&]()
     {
@@ -304,15 +305,15 @@ void ReflectTest::functionInvokeTest()
     };
   VERIFY_THROWS(inv2WithArg1,
     const Reflect::ArgCountException &,
-    Reflect::ArgCountException(1, 2));
+    Reflect::ArgCountException(2, 3));
 
   auto inv2WithNoThis = [&]()
     {
     inv2.fn(&boxer, &data2_1);
     };
   VERIFY_THROWS(inv2WithNoThis,
-    const Crate::ThisException &,
-    Crate::ThisException(Crate::TypeException(Crate::findType<A>(), Crate::findType<void>())));
+    const Reflect::ArgCountException &,
+    Reflect::ArgCountException(2, 1));
 
   QVERIFY(data2.resultCount == 1);
   QVERIFY(data3.resultCount == 1);
@@ -464,8 +465,9 @@ void ReflectTest::overloadingTest()
 
   InvocationBuilder::Arguments args6(nullptr, 0, thsValPtr);
 
-  typedef Reflect::FunctionArgumentTypeSelector<Method1::Builder, Method4::Builder> Overload1; // 2 args
-  typedef Reflect::FunctionArgumentTypeSelector<Method2::Builder, Method3::Builder> Overload2; // 1 arg
+  typedef Reflect::FunctionArgumentTypeSelector<Method1::Builder, Method4::Builder> Overload1; // 3 args
+  typedef Reflect::FunctionArgumentTypeSelector<Method2::Builder> Overload2; // 2 arg
+  typedef Reflect::FunctionArgumentTypeSelector<Method3::Builder> Overload3; // 1 arg
 
   QVERIFY(InvocationBuilder::canCallSelf<Overload1>(&boxer, &args1));
   QVERIFY(!InvocationBuilder::canCallSelf<Overload1>(&boxer, &args2));
@@ -474,7 +476,7 @@ void ReflectTest::overloadingTest()
 
   QVERIFY(!InvocationBuilder::canCallSelf<Overload2>(&boxer, &args1));
   QVERIFY(InvocationBuilder::canCallSelf<Overload2>(&boxer, &args2));
-  QVERIFY(InvocationBuilder::canCallSelf<Overload2>(&boxer, &args3));
+  QVERIFY(!InvocationBuilder::canCallSelf<Overload2>(&boxer, &args3));
   QVERIFY(!InvocationBuilder::canCallSelf<Overload2>(&boxer, &args4));
   QVERIFY(!InvocationBuilder::canCallSelf<Overload2>(&boxer, &args5));
 
@@ -509,7 +511,7 @@ void ReflectTest::overloadingTest()
     const Reflect::OverloadException,
     args1Excep);
   VERIFY_NO_THROWS([&]() { InvocationBuilder::callSelf<Overload2>(&boxer, &args2); });
-  VERIFY_NO_THROWS([&]() { InvocationBuilder::callSelf<Overload2>(&boxer, &args3); });
+  VERIFY_NO_THROWS([&]() { InvocationBuilder::callSelf<Overload3>(&boxer, &args3); });
   VERIFY_THROWS([&]() { InvocationBuilder::callSelf<Overload2>(&boxer, &args4); },
     const Reflect::OverloadException,
     args4Excep2);
@@ -519,20 +521,20 @@ void ReflectTest::overloadingTest()
 
   QCOMPARE(args5Excep2.what(),
 "Unable to find overload matching passed arguments 'A ->( bool )'\n"
-"Possibilities are: A ->( A )\n"
-"void ->( float )\n");
+"Possibilities are: A ->( A )\n");
 
 
   typedef Reflect::FunctionArgumentCountSelector<
-    Reflect::FunctionArgCountSelectorBlock<2, Overload1>,
-    Reflect::FunctionArgCountSelectorBlock<1, Overload2> > AllMethods;
+    Reflect::FunctionArgCountSelectorBlock<3, Overload1>,
+    Reflect::FunctionArgCountSelectorBlock<2, Overload2>,
+    Reflect::FunctionArgCountSelectorBlock<1, Overload3> > AllMethods;
 
   QVERIFY(InvocationBuilder::canCallSelf<AllMethods>(&boxer, &args1));
   QVERIFY(InvocationBuilder::canCallSelf<AllMethods>(&boxer, &args2));
   QVERIFY(InvocationBuilder::canCallSelf<AllMethods>(&boxer, &args3));
   QVERIFY(InvocationBuilder::canCallSelf<AllMethods>(&boxer, &args4));
   QVERIFY(InvocationBuilder::canCallSelf<AllMethods>(&boxer, &args5)); // length matches, types dont - throws in call.
-  QVERIFY(!InvocationBuilder::canCallSelf<AllMethods>(&boxer, &args6));
+  QVERIFY(InvocationBuilder::canCallSelf<AllMethods>(&boxer, &args6));
 
   VERIFY_NO_THROWS([&](){ InvocationBuilder::callSelf<AllMethods>(&boxer, &args1); });
   VERIFY_NO_THROWS([&](){ InvocationBuilder::callSelf<AllMethods>(&boxer, &args2); });
@@ -543,14 +545,14 @@ void ReflectTest::overloadingTest()
     args5Excep2);
 
 
-  auto args6Excep = Reflect::OverloadArgCountException::build<InvocationBuilder, AllMethods>(&args6Call);
+  auto args6Excep = Reflect::OverloadException::build<InvocationBuilder, Overload3>(&args6Call);
   VERIFY_THROWS([&](){ InvocationBuilder::callSelf<AllMethods>(&boxer, &args6); },
-    const Reflect::OverloadArgCountException &,
+    const Reflect::OverloadException &,
     args6Excep);
 
   QCOMPARE(args6Excep.what(),
 "Unable to find overload matching passed arguments 'A ->(  )'\n"
-"Possibilities are functions taking 2 or 1 arguments");
+"Possibilities are: void ->( float )\n");
 
   }
 

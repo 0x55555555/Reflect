@@ -41,9 +41,14 @@ public:
   typedef typename Fwd::CallData CallData;
   typedef typename Fwd::Result Result;
 
-  template <typename Builder, typename SubType> static Result buildCall()
+  template <typename Builder, typename SubType> static Result buildWrappedCall()
     {
-    return Fwd::template buildCall<Builder, SubType>();
+    return Fwd::template buildWrappedCall<Builder, SubType>();
+    }
+
+  template <typename Builder, typename SubType> static Result buildWrappedCanCall()
+    {
+    return Fwd::template buildWrappedCanCall<Builder, SubType>();
     }
 
   static std::string describeArguments(CallData args)
@@ -57,10 +62,10 @@ public:
     return describeFunction<Class, typename Fn::Arguments>(1);
     }
 
-  static std::size_t getArgumentCount(CallData data)
+  static std::size_t getArgumentCountWithThis(CallData data)
     {
-    std::size_t count = Fwd::getArgumentCount(data);
-    return count == 0 ? 0 : count + 1;
+    std::size_t count = Fwd::getArgumentCountWithThis(data);
+    return count;
     }
 
   template <typename T> static T unpackThis(CallData)
@@ -74,13 +79,13 @@ public:
     }
 
   template <std::size_t I, typename Arg>
-      static Arg unpackArgument(CallData args)
+  static Arg unpackArgument(CallData args)
     {
     return detail::InjectorArgGetter<I, Arg, Fwd>::unpackArgument(args);
     }
 
   template <std::size_t I, typename Arg>
-      static bool canUnpackArgument(CallData args)
+  static bool canUnpackArgument(CallData args)
     {
     return detail::InjectorArgGetter<I, Arg, Fwd>::canUnpackArgument(args);
     }

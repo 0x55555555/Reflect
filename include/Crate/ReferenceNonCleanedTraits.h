@@ -9,6 +9,8 @@ namespace Crate
 template <typename T> class ReferenceNonCleanedTraits : public BaseTraits<T, ReferenceNonCleanedTraits<T>>
   {
 public:
+  typedef std::integral_constant<bool, true> Managed;
+
   typedef std::integral_constant<size_t, sizeof(T*)> TypeSize;
   typedef std::integral_constant<size_t, std::alignment_of<T*>::value> TypeAlignment;
 
@@ -26,16 +28,19 @@ public:
     return *getMemory(ifc, data);
     }
 
+  template <typename Box> static void cleanup(Box *, typename Box::BoxedData)
+    {
+    }
+
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
     {
-    ifc->initialise(data, Base::getType(), cleanup<Box>);
+    if (ifc->template initialise<ReferenceNonCleanedTraits<T>, T, cleanup<Box>>(data, Base::getType()) == Base::AlreadyInitialised)
+      {
+      return;
+      }
 
     T **memory = getMemory(ifc, data);
     *memory = dataIn;
-    }
-
-  template <typename Box> static void cleanup(Box *, typename Box::BoxedData)
-    {
     }
   };
 }

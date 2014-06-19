@@ -25,9 +25,19 @@ public:
     return getMemory(ifc, data);
     }
 
+  template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)
+    {
+    T *mem = unbox(ifc, data);
+    (void)mem;
+    mem->~T();
+    }
+
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, const T *dataIn)
     {
-    ifc->initialise(data, Base::getType(), Base::template cleanup<Box>);
+    if (ifc->template initialise<CopyTraits<T>, T, cleanup<Box>>(data, Base::getType()) == Base::AlreadyInitialised)
+      {
+      return;
+      }
 
     T *memory = getMemory(ifc, data);
     new(memory) T(*dataIn);

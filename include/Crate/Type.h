@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <string>
+#include "CrateTypeHelper.h"
 
 namespace Crate
 {
@@ -9,7 +10,7 @@ namespace Crate
 class Type
   {
 public:
-  Type(const char *n) : m_name(n)
+  Type()
     {
     }
 
@@ -17,13 +18,25 @@ public:
     {
     }
 
+  template <typename T> void initialise(const char *n)
+    {
+    m_name = n;
+    m_userData.initialise<T>();
+    }
+
   const std::string &name() const
     {
     return m_name;
     }
 
+  const Crate::TypeUserData& userData() const
+    {
+    return m_userData;
+    }
+
 private:
   std::string m_name;
+  Crate::TypeUserData m_userData;
   };
 
 namespace detail
