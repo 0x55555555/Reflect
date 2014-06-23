@@ -96,7 +96,7 @@ public:
     return o->d;
     }
 
-  template <typename Traits, typename T> typename Traits::InitialiseTypes initialise(Object *o, const Crate::Type *t, Object::Cleanup cln)
+  template <typename Traits, typename T> typename Traits::InitialiseTypes initialise(Object *o, const Crate::Type *t, T*, Object::Cleanup cln)
     {
     assert(!o->type);
     assert(!o->cleanup);
