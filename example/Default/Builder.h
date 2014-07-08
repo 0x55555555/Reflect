@@ -373,6 +373,7 @@ public:
     };
   typedef Call *CallData;
 
+#if REFLECT_DESCRIPTIVE_EXCEPTIONS
   static std::string describeArguments(CallData args)
     {
     auto voidType = Crate::findType<void>();
@@ -443,6 +444,7 @@ public:
 
     return Crate::findType<Class>()->name() + " ->( " + helper.m_result + " )";
     }
+#endif
 
   static std::size_t getArgumentCountWithThis(CallData args)
     {

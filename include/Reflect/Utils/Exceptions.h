@@ -39,10 +39,15 @@ public:
     {
     OverloadException excep;
 
+#if REFLECT_DESCRIPTIVE_EXCEPTIONS
     OverloadHelper<InvHelper, typename Overloads::Selection> helper;
     tupleEach<typename Overloads::Selection>(helper);
 
     excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'\nPossibilities are: " + helper.options;
+#else
+    (void)data;
+    excep.m_error = "Unable to find overload matching passed arguments";
+#endif
     return excep;
     }
 
@@ -68,6 +73,7 @@ protected:
 class OverloadArgCountException : public CallException
   {
 public:
+#if REFLECT_DESCRIPTIVE_EXCEPTIONS
   template <typename InvHelper, typename Tuple> class OverloadHelper
     {
   public:
@@ -91,16 +97,21 @@ public:
 
     std::string options;
     };
+#endif
 
   template <typename InvHelper, typename Overloads>
       static OverloadArgCountException build(typename InvHelper::CallData data)
     {
     OverloadArgCountException excep;
-
+#if REFLECT_DESCRIPTIVE_EXCEPTIONS
     OverloadHelper<InvHelper, typename Overloads::Selection> helper;
     tupleEach<typename Overloads::Selection>(helper);
 
     excep.m_error = "Unable to find overload matching passed arguments '" + InvHelper::describeArguments(data) + "'\nPossibilities are functions taking " + helper.options + " arguments";
+#else
+    (void)data;
+    excep.m_error = "Unable to find overload matching passed arguments";
+#endif
     return excep;
     }
 
