@@ -5,6 +5,7 @@ namespace Reflect
 namespace detail
 {
 
+/// \brief Helper to find a function which can be called
 template <typename InvHelper, typename Functions> class FunctionSelectorCanCallHelper
   {
 public:
@@ -31,6 +32,7 @@ public:
   bool m_foundCall;
   };
 
+/// \brief Helper to find a function which can be called, and call it if found
 template <typename InvHelper, typename Functions> class FunctionSelectorHelper
   {
 public:
@@ -57,6 +59,7 @@ public:
   bool m_foundCall;
   };
 
+/// \brief Helper to find a function with the correct arg count
 template <typename InvHelper, typename Functions> class FunctionArgCountSelectorCanCallHelper
   {
 public:
@@ -83,6 +86,7 @@ public:
   bool m_foundCall;
   };
 
+/// \brief Helper to find a function with the correct arg count, and call it if possible
 template <typename InvHelper, typename Functions> class FunctionArgCountSelectorHelper
   {
 public:
@@ -116,6 +120,7 @@ public:
 
 }
 
+/// \brief Helper block for argument count selection
 template <std::size_t _Count, typename _Fn> struct FunctionArgCountSelectorBlock
   {
   typedef std::integral_constant<std::size_t, _Count> Count;

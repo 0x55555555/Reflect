@@ -49,10 +49,10 @@ HEADERS += \
     ../include/Reflect/Macro/FunctionBuilderImpl.h \
     ../include/Reflect/Macro/FunctionBuilderImplTemplate.h \
     ../include/Reflect/MethodInjectorBuilder.h \
-    ../include/Reflect/ReturnPacker.h \
-    ../include/Reflect/TupleEach.h \
+    ../include/Reflect/Utils/ReturnPacker.h \
+    ../include/Reflect/Utils/TupleEach.h \
     ../include/Reflect/CanCallHelper.h \
-    ../include/Reflect/Exceptions.h \
+    ../include/Reflect/Utils/Exceptions.h \
     ../include/Reflect/FunctionSelector.h \
     ../include/Reflect/Cpp11/FunctionSelectorImpl.h \
     ../include/Reflect/Macro/FunctionSelectorImpl.h \
