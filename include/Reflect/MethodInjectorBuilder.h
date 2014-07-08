@@ -3,38 +3,6 @@
 namespace Reflect
 {
 
-namespace detail
-{
-
-template <std::size_t I, typename Arg, typename Fwd> class InjectorArgGetter
-  {
-public:
-  static Arg unpackArgument(typename Fwd::CallData args)
-    {
-    return Fwd::template unpackArgument<I-1, Arg>(args);
-    }
-
-  static bool canUnpackArgument(typename Fwd::CallData args)
-    {
-    return Fwd::template canUpackArgument<I-1, Arg>(args);
-    }
-  };
-
-template <typename Arg, typename Fwd> class InjectorArgGetter<0, Arg, Fwd>
-  {
-public:
-  static Arg unpackArgument(typename Fwd::CallData args)
-    {
-    return Fwd::template unpackThis<Arg>(args);
-    }
-
-  static bool canUnpackArgument(typename Fwd::CallData args)
-    {
-    return Fwd::template canUnpackThis<Arg>(args);
-    }
-  };
-}
-
 template <typename Fwd> class MethodInjectorBuilder
   {
 public:
@@ -78,16 +46,30 @@ public:
     return false;
     }
 
-  template <std::size_t I, typename Arg>
-  static Arg unpackArgument(CallData args)
+  template <typename Arg>
+  static Arg unpackArgument(CallData args, bool t, std::size_t i)
     {
-    return detail::InjectorArgGetter<I, Arg, Fwd>::unpackArgument(args);
+    if (i == 0)
+      {
+      return Fwd::template unpackThis<Arg>(args);
+      }
+    else
+      {
+      return Fwd::template unpackArgument<Arg>(args, t, i-1);
+      }
     }
 
-  template <std::size_t I, typename Arg>
-  static bool canUnpackArgument(CallData args)
+  template <typename Arg>
+  static bool canUnpackArgument(CallData args, bool t, std::size_t i)
     {
-    return detail::InjectorArgGetter<I, Arg, Fwd>::canUnpackArgument(args);
+    if (i == 0)
+      {
+      return Fwd::template canUnpackThis<Arg>(args, i);
+      }
+    else
+      {
+      return Fwd::template canUnpackArgument<Arg>(args, t, i);
+      }
     }
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)

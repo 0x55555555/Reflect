@@ -466,32 +466,32 @@ public:
     return Caster<T>::canCast(args->boxer, args->args->ths);
     }
 
-  template <std::size_t I, typename Arg>
-      static typename Caster<Arg>::Result unpackArgument(CallData data)
+  template <typename Arg>
+      static typename Caster<Arg>::Result unpackArgument(CallData data, bool, size_t i)
     {
-    if (data->args->argCount <= I)
+    if (data->args->argCount <= i)
       {
-      throw Reflect::ArgCountException(I, data->args->argCount);
+      throw Reflect::ArgCountException(i, data->args->argCount);
       }
 
     try
       {
-      return Caster<Arg>::cast(data->boxer, data->args->args[I]);
+      return Caster<Arg>::cast(data->boxer, data->args->args[i]);
       }
     catch(const Crate::TypeException &type)
       {
-      throw Crate::ArgException(type, I);
+      throw Crate::ArgException(type, i);
       }
     }
 
-  template <std::size_t I, typename Arg>
-      static bool canUnpackArgument(CallData data, bool)
+  template <typename Arg>
+      static bool canUnpackArgument(CallData data, bool, size_t i)
     {
-    if (data->args->argCount <= I)
+    if (data->args->argCount <= i)
       {
       return false;
       }
-    return Caster<Arg>::canCast(data->boxer, data->args->args[I]);
+    return Caster<Arg>::canCast(data->boxer, data->args->args[i]);
     }
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)

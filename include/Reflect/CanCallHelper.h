@@ -21,7 +21,7 @@ public:
     {
     typedef typename std::tuple_element<Idx, Tuple>::type ElementType;
 
-    m_result = InvHelper::template canUnpackArgument<Idx, ElementType>(m_data, !m_static);
+    m_result = InvHelper::template canUnpackArgument<ElementType>(m_data, !m_static, Idx);
     return !m_result;
     }
 

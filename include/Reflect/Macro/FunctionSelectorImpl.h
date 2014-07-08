@@ -15,7 +15,7 @@ struct NilFunction
 
 /// \brief FunctionSelector picks a function from [Functions] based on input arguments, and calls it.
 template <typename A,
-          typename B,
+          typename B=detail::NilFunction,
           typename C=detail::NilFunction,
           typename D=detail::NilFunction,
           typename E=detail::NilFunction,
@@ -26,6 +26,7 @@ template <typename A,
 public:
   typedef FunctionArgumentTypeSelector<A, B, C, D, E, F, G, H> ThisType;
 
+  typedef std::tuple<A> Selection1;
   typedef std::tuple<A, B> Selection2;
   typedef std::tuple<A, B, C> Selection3;
   typedef std::tuple<A, B, C, D> Selection4;
@@ -34,9 +35,10 @@ public:
   typedef std::tuple<A, B, C, D, E, F, G> Selection7;
   typedef std::tuple<A, B, C, D, E, F, G, H> Selection8;
 
-  typedef std::tuple<Selection2, Selection3, Selection4, Selection5, Selection6, Selection7, Selection8> SelectionOptions;
+  typedef std::tuple<Selection1, Selection2, Selection3, Selection4, Selection5, Selection6, Selection7, Selection8> SelectionOptions;
 
-  typedef std::integral_constant<size_t, std::is_same<C, detail::NilFunction>::value ? 2
+  typedef std::integral_constant<size_t, std::is_same<B, detail::NilFunction>::value ? 1
+                                       : std::is_same<C, detail::NilFunction>::value ? 2
                                        : std::is_same<D, detail::NilFunction>::value ? 3
                                        : std::is_same<E, detail::NilFunction>::value ? 4
                                        : std::is_same<F, detail::NilFunction>::value ? 5
@@ -44,7 +46,7 @@ public:
                                        : std::is_same<H, detail::NilFunction>::value ? 7
                                        : 8> Index;
 
-  typedef typename std::tuple_element<Index::value-2, SelectionOptions>::type Selection;
+  typedef typename std::tuple_element<Index::value-1, SelectionOptions>::type Selection;
 
   /// \brief Call to invoke the first matching function.
   /// \param data The data containing the arguments which are passed to the function.
@@ -115,7 +117,7 @@ public:
 
   template <typename InvHelper> static bool canCall(typename InvHelper::CallData data)
     {
-    detail::FunctionArgCountSelectorCanCallHelper<InvHelper, Selection> helper(InvHelper::getArgumentCountWithThis(data, true));
+    detail::FunctionArgCountSelectorCanCallHelper<InvHelper, Selection> helper(InvHelper::getArgumentCountWithThis(data));
     tupleEach<Selection>(helper);
     return helper.m_foundCall;
     }
