@@ -79,7 +79,7 @@ template <> struct TypeResolver<Vector3>
   static const Type *find()
     {
     static Type t;
-    t.initialise<Vector3>("Vector3");
+    t.initialise<Vector3>("Vector3", nullptr);
     return &t;
     }
   };
@@ -89,7 +89,7 @@ template <> struct TypeResolver<NonCopyable>
   static const Type *find()
     {
     static Type t;
-    t.initialise<NonCopyable>("NonCopyable");
+    t.initialise<NonCopyable>("NonCopyable", nullptr);
     return &t;
     }
   };
@@ -99,7 +99,7 @@ template <> struct TypeResolver<NonCopyableReferencable>
   static const Type *find()
     {
     static Type t;
-    t.initialise<NonCopyableReferencable>("NonCopyableReferencable");
+    t.initialise<NonCopyableReferencable>("NonCopyableReferencable", nullptr);
     return &t;
     }
   };

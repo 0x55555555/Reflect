@@ -21,8 +21,7 @@ public:
 
   template<typename Box> static bool canUnbox(Box *ifc, typename Box::BoxedData data)
     {
-    return RootTraits::canUnbox(ifc, data) &&
-      CastHelper<Root, T>::canCast(RootTraits::unbox(ifc, data));
+    return BaseClassTraits::canUnbox(ifc, data);
     }
 
   template<typename Box> static T *unbox(Box *ifc, typename Box::BoxedData data)

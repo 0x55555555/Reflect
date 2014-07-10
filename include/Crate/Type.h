@@ -18,15 +18,21 @@ public:
     {
     }
 
-  template <typename T> void initialise(const char *n)
+  template <typename T> void initialise(const char *n, const Type *parent)
     {
     m_name = n;
+    m_parent = parent;
     m_userData.initialise<T>();
     }
 
   const std::string &name() const
     {
     return m_name;
+    }
+
+  const Type *parent() const
+    {
+    return m_parent;
     }
 
   const Crate::TypeUserData& userData() const
@@ -36,6 +42,7 @@ public:
 
 private:
   std::string m_name;
+  const Type *m_parent;
   Crate::TypeUserData m_userData;
   };
 

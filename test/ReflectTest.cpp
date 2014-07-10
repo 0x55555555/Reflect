@@ -87,7 +87,7 @@ template <> struct TypeResolver<A>
   static const Type *find()
     {
     static Type t;
-    t.initialise<A>("A");
+    t.initialise<A>("A", nullptr);
     return &t;
     }
   };
