@@ -34,7 +34,7 @@ public:
 
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, const T *dataIn)
     {
-    if (ifc->template initialise<CopyTraits<T>, T>(data, Base::getType(), dataIn, cleanup<Box>) == Base::AlreadyInitialised)
+    if (ifc->template initialise<CopyTraits<T>, T>(data, Base::getType(), Base::getType(), dataIn, cleanup<Box>) == Base::AlreadyInitialised)
       {
       return;
       }
