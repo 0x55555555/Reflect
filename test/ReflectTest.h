@@ -34,4 +34,5 @@ private Q_SLOTS:
   void nonCopyableNonCleanedTyperTest();
   void canCallTest();
   void overloadingTest();
+  void parentingTest();
   };

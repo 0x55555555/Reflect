@@ -562,7 +562,6 @@ void ReflectTest::overloadingTest()
   QCOMPARE(args6Excep.what(),
 "Unable to find overload matching passed arguments 'A ->(  )'\n"
 "Possibilities are: void ->( float )\n");
-
   }
 
 int main(int argc, char *argv[])
