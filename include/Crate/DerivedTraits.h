@@ -28,12 +28,12 @@ public:
     {
     RootTraits::checkUnboxable(ifc, data);
 
-    return static_cast<T*>(*RootTraits::getMemory(ifc, data));
+    return static_cast<T*>(RootTraits::unbox(ifc, data));
     }
 
   template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)
     {
-    Traits<Root>::cleanup(ifc, data);
+    RootTraits::cleanup(ifc, data);
     }
   
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
