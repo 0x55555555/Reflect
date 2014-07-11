@@ -35,6 +35,7 @@ public:
   };
   
   typedef std::integral_constant<bool, false> Managed;
+  typedef T *UnboxResult;
 
   template<typename Box> static bool canUnbox(Box *ifc, typename Box::BoxedData data);
 
