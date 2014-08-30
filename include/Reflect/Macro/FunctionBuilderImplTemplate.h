@@ -1,7 +1,7 @@
 #define JOIN(A, B) JOIN_IMPL(A, B)
 #define JOIN_IMPL(A, B) A##B
 #define CALL_HELPER_NAME JOIN(CallHelper, REFLEX_TEMPLATE_COUNT)
-#define UNPACK_HELPER(Idx) , InvHelper::template unpackArgument<Idx, typename std::tuple_element<Idx, Args>::type>(data, FunctionHelper::Static::value == false)
+#define UNPACK_HELPER(Idx) , InvHelper::template unpackArgument<typename std::tuple_element<Idx, Args>::type>(data, FunctionHelper::Static::value == false, Idx)
 
 namespace Reflect
 {
@@ -49,7 +49,9 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     }
   };
 
-/// \brief Class definition for the FunctionHelper. Specialised further below.
+}
+
+/// \brief Class definition for the FunctionSignature. Specialised further below.
 ///
 ///        Expects several members:
 ///          Const      An integral constant which defines if the function is Const
@@ -60,7 +62,7 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
 ///          Signature  A typedef for the signature of the function.
 ///          call       A function which calls the function, accepting a pointer to Class
 ///                     and arguments for the call.
-template <typename FnType> class FunctionHelper;
+template <typename FnType> class FunctionSignature;
 
 #define TYPENAME_HELPER(Idx) , typename JOIN(Arg, Idx)
 #define ARG_HELPER(Idx) JOIN(Arg, Idx)
@@ -69,9 +71,9 @@ template <typename FnType> class FunctionHelper;
 
 
 /// \overload
-/// \brief FunctionHelper definition for a non-const member function.
+/// \brief FunctionSignature definition for a non-const member function.
 template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
-    class FunctionHelper<Rt(Cls::*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER))>
+    class FunctionSignature<Rt(Cls::*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER))>
   {
 public:
   typedef std::integral_constant<bool, false> Const;
@@ -97,9 +99,9 @@ public:
   };
 
 /// \overload
-/// \brief FunctionHelper definition for a const member function.
+/// \brief FunctionSignature definition for a const member function.
 template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
-    class FunctionHelper<Rt(Cls::*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)) const>
+    class FunctionSignature<Rt(Cls::*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)) const>
   {
   public:
   typedef std::integral_constant<bool, true> Const;
@@ -127,7 +129,7 @@ template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
 /// \overload
 /// \brief FunctionHelper definition for a static function.
 template <typename Rt REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
-    class FunctionHelper<Rt (*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER))>
+    class FunctionSignature<Rt (*)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER))>
   {
   public:
   typedef std::integral_constant<bool, false> Const;
@@ -149,7 +151,6 @@ template <typename Rt REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
     }
   };
 
-}
 }
 
 #undef TYPENAME_HELPER

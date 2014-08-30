@@ -7,6 +7,7 @@ namespace Reflect
 namespace detail
 {
 
+/// \brief Default class for packing a return argument
 template <typename T, typename InvHelper> class ReturnPacker
   {
 public:
@@ -17,6 +18,7 @@ public:
   };
 
 
+/// \brief Helper which packs tuple members as individual return arguments
 template <typename Tuple, typename InvHelper> class TuplePackerHelper
   {
 public:
@@ -41,6 +43,7 @@ private:
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
 
+/// \brief Packs tuple members as individual return arguments
 template <typename InvHelper, typename A, typename B, typename C, typename D> class ReturnPacker<std::tuple<A, B, C, D>, InvHelper>
   {
 public:
@@ -55,6 +58,7 @@ public:
 
 #else
 
+/// \brief Packs tuple members as individual return arguments
 template <typename InvHelper, typename... Args> class ReturnPacker<std::tuple<Args...>, InvHelper>
   {
 public:

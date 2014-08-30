@@ -1,8 +1,8 @@
 #pragma once
 #include <tuple>
-#include "Reflect/Exceptions.h"
-#include "Reflect/ReturnPacker.h"
-#include "Reflect/CanCallHelper.h"
+#include "Reflect/Utils/Exceptions.h"
+#include "Reflect/Utils/ReturnPacker.h"
+#include "Reflect/Utils/CanCallHelper.h"
 
 namespace Reflect
 {
@@ -30,7 +30,7 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     // Call the function, unpacking arguments, collect the return.
     auto result = FunctionHelper::template call<Fn, InvHelper>(
       data,
-      InvHelper::template unpackArgument<Idx, typename std::tuple_element<Idx, Args>::type>(data)...
+      InvHelper::template unpackArgument<typename std::tuple_element<Idx, Args>::type>(data, FunctionHelper::Static::value == false, Idx)...
       );
 
     // Pack the return into data.
@@ -51,19 +51,22 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     // Call the function, unpacking arguments.
     FunctionHelper::template call<Fn, InvHelper>(
       data,
-      InvHelper::template unpackArgument<Idx, typename std::tuple_element<Idx, Args>::type>(data)...
+      InvHelper::template unpackArgument<typename std::tuple_element<Idx, Args>::type>(data, FunctionHelper::Static::value == false, Idx)...
       );
     }
   };
+
+}
 
 /// \brief Helper class to create calls to functions.
 /// \param InvHelper      A user defined helper which knows how to pack and unpack arguments.
 /// \param FunctionHelper The type of the function to be wrapped - a specialised FunctionHelper<...>
 /// \param Fn             The function to call.
-template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
-    struct CallHelper
+template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, typename _Caller>
+    struct FunctionCall
   {
   typedef _FunctionHelper Helper;
+  typedef _Caller Caller;
 
   /// \brief Call to invoke the function.
   /// \param data The data containing the arguments which are passed to the function.
@@ -72,9 +75,9 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     // The size of the tuple.
     typedef std::tuple_size<typename Helper::Arguments> TupleSize;
     // Indices for the arguments.
-    typedef BuildIndices<TupleSize::value> IndicesForFunction;
+    typedef detail::BuildIndices<TupleSize::value> IndicesForFunction;
     // The correct dispatcher - based on the ReturnType.
-    typedef ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
+    typedef detail::ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
 
     typedef typename Helper::Static Static;
     const std::size_t expectedArgument = (std::size_t)TupleSize::value + (Static::value ? 0 : 1);
@@ -97,7 +100,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     }
   };
 
-/// \brief Class definition for the FunctionHelper. Specialised further below.
+/// \brief Class definition for the FunctionSignature. Specialised further below.
 ///
 ///        Expects several members:
 ///          Const      An integral constant which defines if the function is Const
@@ -108,12 +111,12 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
 ///          Signature  A typedef for the signature of the function.
 ///          call       A function which calls the function, accepting a pointer to Class
 ///                     and arguments for the call.
-template <typename FnType> class FunctionHelper;
+template <typename FnType> class FunctionSignature;
 
 /// \overload
-/// \brief FunctionHelper definition for a non-const member function.
+/// \brief FunctionSignature definition for a non-const member function.
 template <typename Rt, typename Cls, typename... Args>
-    class FunctionHelper<Rt(Cls::*)(Args...)>
+    class FunctionSignature<Rt(Cls::*)(Args...)>
   {
 public:
   typedef std::integral_constant<bool, false> Const;
@@ -139,9 +142,9 @@ public:
   };
 
 /// \overload
-/// \brief FunctionHelper definition for a const member function.
+/// \brief FunctionSignature definition for a const member function.
 template <typename Rt, typename Cls, typename... Args>
-    class FunctionHelper<Rt(Cls::*)(Args...) const>
+    class FunctionSignature<Rt(Cls::*)(Args...) const>
   {
   public:
   typedef std::integral_constant<bool, true> Const;
@@ -167,9 +170,9 @@ template <typename Rt, typename Cls, typename... Args>
   };
 
 /// \overload
-/// \brief FunctionHelper definition for a static function.
+/// \brief FunctionSignature definition for a static function.
 template <typename Rt, typename... Args>
-    class FunctionHelper<Rt (*)(Args...)>
+    class FunctionSignature<Rt (*)(Args...)>
   {
   public:
   typedef std::integral_constant<bool, false> Const;
@@ -191,5 +194,4 @@ template <typename Rt, typename... Args>
     }
   };
 
-}
 }

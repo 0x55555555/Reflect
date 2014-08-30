@@ -35,6 +35,7 @@ public:
   };
   
   typedef std::integral_constant<bool, false> Managed;
+  typedef T *UnboxResult;
 
   template<typename Box> static bool canUnbox(Box *ifc, typename Box::BoxedData data);
 
@@ -42,6 +43,20 @@ public:
   
   template <typename Box> static void checkUnboxable(Box *ifc, typename Box::BoxedData data);
   };
+
+
+template <typename T, typename Derived> template<typename Box> bool BaseTraits<T, Derived>::canUnbox(Box *ifc, typename Box::BoxedData data)
+  {
+  const auto neededType = getType();
+  for (auto type = ifc->getType(data); type; type = type->parent())
+    {
+    if (type == neededType)
+      {
+      return true;
+      }
+    }
+  return false;
+  }
 
 }
 

@@ -30,8 +30,7 @@ template <typename T> class ReferenceTraits : public BaseTraits<T, ReferenceTrai
   template <typename Box> static void cleanup(Box *ifc, typename Box::BoxedData data)
     {
     T *mem = unbox(ifc, data);
-    (void)mem;
-    mem->~T();
+    delete mem;
     }
   
   template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)

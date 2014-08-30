@@ -87,7 +87,7 @@ template <> struct TypeResolver<A>
   static const Type *find()
     {
     static Type t;
-    t.initialise<A>("A");
+    t.initialise<A>("A", nullptr);
     return &t;
     }
   };
@@ -157,17 +157,17 @@ void ReflectTest::methodWrapTest()
   using namespace Reflect;
   typedef A ReflectClass;
 
-  typedef REFLECT_METHOD(pork1) Method1;
-  typedef REFLECT_METHOD(pork2) Method2;
-  typedef REFLECT_METHOD(pork3) Method3;
+  typedef FunctionSignature<decltype(&A::pork1)> Method1;
+  typedef FunctionSignature<decltype(&A::pork2)> Method2;
+  typedef FunctionSignature<decltype(&A::pork3)> Method3;
 
   QCOMPARE(Crate::findType<Method1::ReturnType>(), Crate::findType<void>());
   QCOMPARE(Crate::findType<Method2::ReturnType>(), Crate::findType<int>());
   QCOMPARE(Crate::findType<Method3::ReturnType>(), Crate::findType<A*>());
 
-  QCOMPARE((int)Method1::argumentCount(), 2);
-  QCOMPARE((int)Method2::argumentCount(), 1);
-  QCOMPARE((int)Method3::argumentCount(), 1);
+  QCOMPARE((int)std::tuple_size<Method1::Arguments>::value, 2);
+  QCOMPARE((int)std::tuple_size<Method2::Arguments>::value, 1);
+  QCOMPARE((int)std::tuple_size<Method3::Arguments>::value, 1);
 
   typedef std::tuple_element<0, Method1::Arguments>::type Method1Arg0;
   typedef std::tuple_element<1, Method1::Arguments>::type Method1Arg1;
@@ -179,29 +179,29 @@ void ReflectTest::methodWrapTest()
   QCOMPARE(Crate::findType<Method2Arg0>(), Crate::findType<A *>());
   QCOMPARE(Crate::findType<Method3Arg0>(), Crate::findType<const float &>());
 
-  QCOMPARE(Method1::Helper::Const::value, false);
-  QCOMPARE(Method2::Helper::Const::value, true);
-  QCOMPARE(Method3::Helper::Const::value, false);
+  QCOMPARE(Method1::Const::value, false);
+  QCOMPARE(Method2::Const::value, true);
+  QCOMPARE(Method3::Const::value, false);
 
-  QCOMPARE(Method1::Helper::Static::value, false);
-  QCOMPARE(Method2::Helper::Static::value, false);
-  QCOMPARE(Method3::Helper::Static::value, true);
+  QCOMPARE(Method1::Static::value, false);
+  QCOMPARE(Method2::Static::value, false);
+  QCOMPARE(Method3::Static::value, true);
 
-  QCOMPARE(Crate::findType<Method1::Helper::Class>(), Crate::findType<A>());
-  QCOMPARE(Crate::findType<Method2::Helper::Class>(), Crate::findType<A>());
-  QCOMPARE(Crate::findType<Method3::Helper::Class>(), Crate::findType<void>());
+  QCOMPARE(Crate::findType<Method1::Class>(), Crate::findType<A>());
+  QCOMPARE(Crate::findType<Method2::Class>(), Crate::findType<A>());
+  QCOMPARE(Crate::findType<Method3::Class>(), Crate::findType<void>());
   }
 
 void ReflectTest::functionWrapTest()
   {
   using namespace Reflect;
-  typedef REFLECT_FUNCTION(staticMethod) Fn;
+  typedef FunctionSignature<decltype(&staticMethod)> Fn;
 
   A a;
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = InvocationBuilder::buildCallSelf<Fn::Builder>();
+  auto inv1 = InvocationBuilder::buildCallSelf<FunctionCall<Fn, &staticMethod, InvocationBuilder>>();
 
   Reflect::example::Boxer boxer;
 
@@ -216,12 +216,13 @@ void ReflectTest::functionWrapTest()
 void ReflectTest::methodInjectionTest()
   {
   using namespace Reflect;
-  typedef REFLECT_FUNCTION(staticMethod) Fn;
+  typedef FunctionSignature<decltype(&staticMethod)> Fn;
 
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildWrappedCall<Fn::Builder, MethodInjectorBuilder<InvocationBuilder>>();
+  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildWrappedCall<
+    FunctionCall<Fn, &staticMethod, InvocationBuilder>, MethodInjectorBuilder<InvocationBuilder>>();
 
   Reflect::example::Boxer boxer;
 
@@ -240,15 +241,14 @@ void ReflectTest::methodInjectionTest()
 void ReflectTest::functionInvokeTest()
   {
   using namespace Reflect;
-  typedef A ReflectClass;
 
-  typedef REFLECT_METHOD(pork1) Method1;
-  typedef REFLECT_METHOD(pork2) Method2;
-  typedef REFLECT_METHOD(pork3) Method3;
+  typedef FunctionSignature<decltype(&A::pork1)> Method1;
+  typedef FunctionSignature<decltype(&A::pork2)> Method2;
+  typedef FunctionSignature<decltype(&A::pork3)> Method3;
 
-  auto inv1 = InvocationBuilder::buildCallSelf<Method1::Builder>();
-  auto inv2 = InvocationBuilder::buildCallSelf<Method2::Builder>();
-  auto inv3 = InvocationBuilder::buildCallSelf<Method3::Builder>();
+  auto inv1 = InvocationBuilder::buildCallSelf<FunctionCall<Method1, &A::pork1, InvocationBuilder>>();
+  auto inv2 = InvocationBuilder::buildCallSelf<FunctionCall<Method2, &A::pork2, InvocationBuilder>>();
+  auto inv3 = InvocationBuilder::buildCallSelf<FunctionCall<Method3, &A::pork3, InvocationBuilder>>();
 
   A a;
   a.pork = SELF_VAL;
@@ -325,11 +325,10 @@ void ReflectTest::multipleReturnTest()
   {
   //
   using namespace Reflect;
-  typedef A ReflectClass;
 
-  typedef REFLECT_METHOD(multiReturn) Method;
+  typedef FunctionSignature<decltype(&A::multiReturn)> Fn;
 
-  auto inv = InvocationBuilder::buildCallSelf<Method::Builder>();
+  auto inv = InvocationBuilder::buildCallSelf<FunctionCall<Fn, &A::multiReturn, InvocationBuilder>>();
 
   Reflect::example::Boxer boxer;
 
@@ -350,23 +349,24 @@ void ReflectTest::multipleReturnTest()
   QVERIFY(data1.results[2].db == 5.0);
   }
 
-template <typename Builder> class CanCallTestHelper
+template <typename Builder, typename Sig, Sig Fn> class CanCallTestHelper
   {
 public:
   template <typename T> static bool canCall(Reflect::example::Boxer *b, typename T::Arguments &data)
     {
-    auto result = T::template buildCanCall<typename Builder::Builder, T>();
+    auto result = T::template buildCanCall<Reflect::FunctionCall<Builder, Fn, InvocationBuilder>, T>();
     return result.fn(b, &data);
     }
   };
 
 void ReflectTest::canCallTest()
   {
-  REFLECT_FUNCTION_HELPER(A);
-  typedef REFLECT_METHOD(pork1) Method1; // 2 args
-  typedef REFLECT_METHOD(pork2) Method2; // 1 arg
-  typedef REFLECT_METHOD(pork3) Method3; // 1 arg
-  typedef REFLECT_METHOD(pork4) Method4; // 2 args
+  using namespace Reflect;
+  typedef FunctionSignature<decltype(&A::pork1)> Method1;
+  typedef FunctionSignature<decltype(&A::pork2)> Method2;
+  typedef FunctionSignature<decltype(&A::pork3)> Method3;
+  typedef FunctionSignature<decltype(&A::pork4)> Method4;
+
 
   Reflect::example::Boxer boxer;
 
@@ -397,34 +397,39 @@ void ReflectTest::canCallTest()
   Reflect::example::initArgs(&boxer, argVals4, argsP4, &a, 5.0f);
   InvocationBuilder::Arguments args4(argsP4, 2, thsValPtr);
 
-  QVERIFY(CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args1));
-  QVERIFY(!CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args1));
-  QVERIFY(!CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args1));
-  QVERIFY(!CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args1));
+  typedef CanCallTestHelper<Method1, Method1::Signature, &A::pork1> Helper1;
+  typedef CanCallTestHelper<Method2, Method2::Signature, &A::pork2> Helper2;
+  typedef CanCallTestHelper<Method3, Method3::Signature, &A::pork3> Helper3;
+  typedef CanCallTestHelper<Method4, Method4::Signature, &A::pork4> Helper4;
 
-  QVERIFY(!CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args2));
-  QVERIFY(CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args2));
-  QVERIFY(!CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args2));
-  QVERIFY(!CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args2));
+  QVERIFY(Helper1::canCall<InvocationBuilder>(&boxer, args1));
+  QVERIFY(!Helper2::canCall<InvocationBuilder>(&boxer, args1));
+  QVERIFY(!Helper3::canCall<InvocationBuilder>(&boxer, args1));
+  QVERIFY(!Helper4::canCall<InvocationBuilder>(&boxer, args1));
 
-  QVERIFY(!CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args3));
-  QVERIFY(!CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args3));
-  QVERIFY(CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args3));
-  QVERIFY(!CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args3));
+  QVERIFY(!Helper1::canCall<InvocationBuilder>(&boxer, args2));
+  QVERIFY(Helper2::canCall<InvocationBuilder>(&boxer, args2));
+  QVERIFY(!Helper3::canCall<InvocationBuilder>(&boxer, args2));
+  QVERIFY(!Helper4::canCall<InvocationBuilder>(&boxer, args2));
 
-  QVERIFY(!CanCallTestHelper<Method1>::canCall<InvocationBuilder>(&boxer, args4));
-  QVERIFY(!CanCallTestHelper<Method2>::canCall<InvocationBuilder>(&boxer, args4));
-  QVERIFY(!CanCallTestHelper<Method3>::canCall<InvocationBuilder>(&boxer, args4));
-  QVERIFY(CanCallTestHelper<Method4>::canCall<InvocationBuilder>(&boxer, args4));
+  QVERIFY(!Helper1::canCall<InvocationBuilder>(&boxer, args3));
+  QVERIFY(!Helper2::canCall<InvocationBuilder>(&boxer, args3));
+  QVERIFY(Helper3::canCall<InvocationBuilder>(&boxer, args3));
+  QVERIFY(!Helper4::canCall<InvocationBuilder>(&boxer, args3));
+
+  QVERIFY(!Helper1::canCall<InvocationBuilder>(&boxer, args4));
+  QVERIFY(!Helper2::canCall<InvocationBuilder>(&boxer, args4));
+  QVERIFY(!Helper3::canCall<InvocationBuilder>(&boxer, args4));
+  QVERIFY(Helper4::canCall<InvocationBuilder>(&boxer, args4));
   }
 
 void ReflectTest::overloadingTest()
   {
-  REFLECT_FUNCTION_HELPER(A);
-  typedef REFLECT_METHOD(pork1) Method1; // 2 args
-  typedef REFLECT_METHOD(pork2) Method2; // 1 arg
-  typedef REFLECT_METHOD(pork3) Method3; // 1 arg
-  typedef REFLECT_METHOD(pork4) Method4; // 2 args
+  using namespace Reflect;
+  typedef FunctionSignature<decltype(&A::pork1)> Method1;
+  typedef FunctionSignature<decltype(&A::pork2)> Method2;
+  typedef FunctionSignature<decltype(&A::pork3)> Method3;
+  typedef FunctionSignature<decltype(&A::pork4)> Method4;
 
   Reflect::example::Boxer boxer;
 
@@ -465,9 +470,13 @@ void ReflectTest::overloadingTest()
 
   InvocationBuilder::Arguments args6(nullptr, 0, thsValPtr);
 
-  typedef Reflect::FunctionArgumentTypeSelector<Method1::Builder, Method4::Builder> Overload1; // 3 args
-  typedef Reflect::FunctionArgumentTypeSelector<Method2::Builder> Overload2; // 2 arg
-  typedef Reflect::FunctionArgumentTypeSelector<Method3::Builder> Overload3; // 1 arg
+  typedef Reflect::FunctionArgumentTypeSelector<
+    Reflect::FunctionCall<Method1, &A::pork1, InvocationBuilder>,
+    Reflect::FunctionCall<Method4, &A::pork4, InvocationBuilder>> Overload1; // 3 args
+  typedef Reflect::FunctionArgumentTypeSelector<
+    Reflect::FunctionCall<Method2, &A::pork2, InvocationBuilder>> Overload2; // 2 arg
+  typedef Reflect::FunctionArgumentTypeSelector<
+      Reflect::FunctionCall<Method3, &A::pork3, InvocationBuilder>> Overload3; // 1 arg
 
   QVERIFY(InvocationBuilder::canCallSelf<Overload1>(&boxer, &args1));
   QVERIFY(!InvocationBuilder::canCallSelf<Overload1>(&boxer, &args2));
@@ -553,7 +562,6 @@ void ReflectTest::overloadingTest()
   QCOMPARE(args6Excep.what(),
 "Unable to find overload matching passed arguments 'A ->(  )'\n"
 "Possibilities are: void ->( float )\n");
-
   }
 
 int main(int argc, char *argv[])

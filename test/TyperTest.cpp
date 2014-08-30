@@ -35,6 +35,13 @@ public:
   float z;
   };
 
+
+class Vector3Better : public Vector3
+  {
+public:
+  Vector3Better() : Vector3(0,0,0) { }
+  };
+
 class NonCopyable
   {
 public:
@@ -79,7 +86,18 @@ template <> struct TypeResolver<Vector3>
   static const Type *find()
     {
     static Type t;
-    t.initialise<Vector3>("Vector3");
+    t.initialise<Vector3>("Vector3", nullptr);
+    return &t;
+    }
+  };
+
+
+template <> struct TypeResolver<Vector3Better>
+  {
+  static const Type *find()
+    {
+    static Type t;
+    t.initialise<Vector3Better>("Vector3Better", findType<Vector3>());
     return &t;
     }
   };
@@ -89,7 +107,7 @@ template <> struct TypeResolver<NonCopyable>
   static const Type *find()
     {
     static Type t;
-    t.initialise<NonCopyable>("NonCopyable");
+    t.initialise<NonCopyable>("NonCopyable", nullptr);
     return &t;
     }
   };
@@ -99,7 +117,7 @@ template <> struct TypeResolver<NonCopyableReferencable>
   static const Type *find()
     {
     static Type t;
-    t.initialise<NonCopyableReferencable>("NonCopyableReferencable");
+    t.initialise<NonCopyableReferencable>("NonCopyableReferencable", nullptr);
     return &t;
     }
   };
@@ -118,6 +136,7 @@ template <> class Traits<NonCopyableReferencable> : public ReferenceNonCleanedTr
 }
 
 typedef Crate::Traits<Vector3> Vector3Traits;
+typedef Crate::Traits<Vector3Better> Vector3BetterTraits;
 typedef Crate::Traits<NonCopyable> NonCopyableTraits;
 typedef Crate::Traits<NonCopyableReferencable> NonCopyableReferencableTraits;
 
@@ -349,3 +368,40 @@ void ReflectTest::nonCopyableNonCleanedTyperTest()
   QCOMPARE(copyCount, 1);
   QCOMPARE(dtorCount, 3);
   }
+
+void ReflectTest::parentingTest()
+  {
+  auto vec3 = Crate::findType<Vector3>();
+  auto vec3Better = Crate::findType<Vector3Better>();
+
+  QVERIFY(vec3);
+  QVERIFY(vec3Better);
+
+  QVERIFY(!vec3->parent());
+  QVERIFY(vec3Better->parent() == vec3);
+
+  Vector3Better vec;
+
+  Reflect::example::Boxer boxer;
+  auto vec3Obj = boxer.create<Vector3Traits>();
+  Vector3Traits::box(&boxer, vec3Obj.get(), &vec);
+  auto vec3BetterObj = boxer.create<Vector3BetterTraits>();
+  Vector3BetterTraits::box(&boxer, vec3BetterObj.get(), &vec);
+
+  QVERIFY(Vector3Traits::unbox(&boxer, vec3Obj.get()));
+
+  bool caught = false;
+  try
+    {
+    Vector3BetterTraits::unbox(&boxer, vec3Obj.get());
+    }
+  catch(...)
+    {
+    caught = true;
+    }
+  QVERIFY(caught);
+
+  QVERIFY(Vector3Traits::unbox(&boxer, vec3BetterObj.get()));
+  QVERIFY(Vector3BetterTraits::unbox(&boxer, vec3BetterObj.get()));
+  }
+

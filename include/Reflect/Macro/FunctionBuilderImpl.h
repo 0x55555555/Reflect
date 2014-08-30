@@ -1,8 +1,8 @@
 #pragma once
 #include <tuple>
-#include "Reflect/ReturnPacker.h"
-#include "Reflect/CanCallHelper.h"
-#include "Reflect/Exceptions.h"
+#include "Reflect/Utils/ReturnPacker.h"
+#include "Reflect/Utils/CanCallHelper.h"
+#include "Reflect/Utils/Exceptions.h"
 
 namespace Reflect
 {
@@ -95,16 +95,16 @@ template <size_t ArgCount, typename InvHelper, typename FunctionHelper, typename
 
 namespace Reflect
 {
-namespace detail
-{
+
 /// \brief Helper class to create calls to functions.
 /// \param InvHelper      A user defined helper which knows how to pack and unpack arguments.
 /// \param FunctionHelper The type of the function to be wrapped - a specialised FunctionHelper<...>
 /// \param Fn             The function to call.
-template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
-    struct CallHelper
+template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, typename _Caller>
+    struct FunctionCall
   {
   typedef _FunctionHelper Helper;
+  typedef _Caller Caller;
 
   /// \brief Call to invoke the function.
   /// \param data The data containing the arguments which are passed to the function.
@@ -112,7 +112,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     {
     typedef std::tuple_size<typename Helper::Arguments> ArgCount;
     // The correct dispatcher - based on the ReturnType.
-    typedef ReturnDispatch<
+    typedef detail::ReturnDispatch<
       ArgCount::value,
       InvHelper,
       Helper,
@@ -121,7 +121,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
 
     std::size_t expectedArgs = (std::size_t)ArgCount::value + (Helper::Static::value ? 0 : 1);
 
-    typedef Helper::Static Static;
+    typedef typename Helper::Static Static;
     if (InvHelper::getArgumentCountWithThis(data) != expectedArgs)
       {
       throw ArgCountException(
@@ -140,6 +140,5 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn>
     }
   };
 
-}
 }
 

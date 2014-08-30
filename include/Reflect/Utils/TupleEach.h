@@ -30,6 +30,7 @@ public:
 
 }
 
+/// \brief Util to visit tuple members and call a function.
 template <typename Tuple, typename Visitor> void tupleEach(Visitor &d)
   {
   detail::TupleVisitor<std::tuple_size<Tuple>::value, Visitor>::visit(d);

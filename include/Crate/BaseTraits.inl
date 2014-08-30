@@ -6,13 +6,6 @@
 namespace Crate
 {
 
-
-template <typename T, typename Derived> template<typename Box> bool BaseTraits<T, Derived>::canUnbox(Box *ifc, typename Box::BoxedData data)
-  {
-  auto type = ifc->getType(data);
-  return type == getType();
-  }
-
 template <typename T, typename Derived> const Type *BaseTraits<T, Derived>::getType()
   {
   return findType<T>();
