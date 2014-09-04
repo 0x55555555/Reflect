@@ -9,13 +9,19 @@ template <typename T> class CopyTraits : public BaseTraits<T, CopyTraits<T>>
   {
 public:
   typedef std::integral_constant<size_t, sizeof(T)> TypeSize;
-  typedef std::integral_constant<size_t, detail::alignment_of<T>::value> TypeAlignment;
+  typedef std::integral_constant<size_t, detail::alignment_of<T>::value < 4 ? 4 : detail::alignment_of<T>::value> TypeAlignment;
 
   typedef BaseTraits<T, CopyTraits<T>> Base;
 
   template <typename Box> static T *getMemory(Box *ifc, typename Box::BoxedData data)
     {
-    return static_cast<T *>(ifc->getMemory(data));
+    auto mem = ifc->getMemory(data);
+
+    size_t memS = (size_t)mem;
+    auto diff = memS % TypeAlignment::value;
+    memS += TypeAlignment::value - diff;
+
+    return static_cast<T *>((void*)memS);
     }
 
   template<typename Box> static T *unbox(Box *ifc, typename Box::BoxedData data)
