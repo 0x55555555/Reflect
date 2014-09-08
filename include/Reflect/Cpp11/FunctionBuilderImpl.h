@@ -80,11 +80,14 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
     typedef detail::ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
 
     typedef typename Helper::Static Static;
-    const std::size_t expectedArgument = (std::size_t)TupleSize::value + (Static::value ? 0 : 1);
-    if (InvHelper::getArgumentCountWithThis(data) != expectedArgument)
+    typedef typename Caller::ForceMember ForceMember;
+    std::size_t expectedThisArgs = (!ForceMember::value && Helper::Static::value) ? 0 : 1;
+    std::size_t expectedArgs = (std::size_t)ArgCount::value + expectedThisArgs;
+
+    if (InvHelper::getArgumentCountWithThis(data) != expectedArgs)
       {
       throw ArgCountException(
-        expectedArgument,
+        expectedArgs,
         InvHelper::getArgumentCountWithThis(data));
       }
 

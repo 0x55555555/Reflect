@@ -114,19 +114,20 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
     // The correct dispatcher - based on the ReturnType.
     typedef detail::ReturnDispatch<
       ArgCount::value,
-      InvHelper,
+      Caller,
       Helper,
       Fn,
       typename Helper::ReturnType> CallDispatch;
 
-    std::size_t expectedArgs = (std::size_t)ArgCount::value + (Helper::Static::value ? 0 : 1);
+    std::size_t expectedThisArgs = Helper::Static::value ? 0 : 1;
+    std::size_t expectedArgs = (std::size_t)ArgCount::value + expectedThisArgs;
 
     typedef typename Helper::Static Static;
-    if (InvHelper::getArgumentCountWithThis(data) != expectedArgs)
+    if (Caller::getArgumentCountWithThis(data) != expectedArgs)
       {
       throw ArgCountException(
         expectedArgs,
-        InvHelper::getArgumentCountWithThis(data));
+        Caller::getArgumentCountWithThis(data));
       }
 
     // call the function.

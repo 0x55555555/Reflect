@@ -1,7 +1,13 @@
 #pragma once
-
+	
 namespace Reflect
 {
+
+// msvc 2010 does not contain a declval.
+namespace detail
+{
+template <typename T> typename std::add_rvalue_reference<T>::type declval();
+}
 
 /// \brief Diverts the this argument of a call to the first parameter for
 /// the function, then passes all the other arguments second.
@@ -10,6 +16,9 @@ template <typename Fwd> class MethodInjectorBuilder
 public:
   typedef typename Fwd::CallData CallData;
   typedef typename Fwd::Result Result;
+  typedef std::integral_constant<bool, true> ForceMember;
+
+  template <typename T> struct ReturnType : Fwd::ReturnType<T> { };
 
   template <typename Builder, typename SubType> static Result buildWrappedCall()
     {
@@ -38,7 +47,7 @@ public:
     return count;
     }
 
-  template <typename T> static T unpackThis(CallData)
+  template <typename T> static typename ReturnType<T>::Type unpackThis(CallData)
     {
     return nullptr;
     }
@@ -48,21 +57,22 @@ public:
     return false;
     }
 
+
   template <typename Arg>
-  static Arg unpackArgument(CallData args, bool t, std::size_t i)
-    {
+  static typename ReturnType<Arg>::Type unpackArgument(CallData args, bool, std::size_t i)
+  {
     if (i == 0)
       {
       return Fwd::template unpackThis<Arg>(args);
       }
     else
       {
-      return Fwd::template unpackArgument<Arg>(args, t, i-1);
+      return Fwd::template unpackArgument<Arg>(args, true, i-1);
       }
     }
 
   template <typename Arg>
-  static bool canUnpackArgument(CallData args, bool t, std::size_t i)
+  static bool canUnpackArgument(CallData args, bool, std::size_t i)
     {
     if (i == 0)
       {
@@ -70,13 +80,13 @@ public:
       }
     else
       {
-      return Fwd::template canUnpackArgument<Arg>(args, t, i);
+      return Fwd::template canUnpackArgument<Arg>(args, true, i);
       }
     }
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
-    Fwd::packReturn(data, result);
+    Fwd::packReturn<Return>(data, result);
     }
   };
 
