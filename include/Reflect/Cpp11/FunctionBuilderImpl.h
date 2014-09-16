@@ -73,9 +73,9 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
   template <typename InvHelper> static void call(typename InvHelper::CallData data)
     {
     // The size of the tuple.
-    typedef std::tuple_size<typename Helper::Arguments> TupleSize;
+    typedef std::tuple_size<typename Helper::Arguments> ArgCount;
     // Indices for the arguments.
-    typedef detail::BuildIndices<TupleSize::value> IndicesForFunction;
+    typedef detail::BuildIndices<ArgCount::value> IndicesForFunction;
     // The correct dispatcher - based on the ReturnType.
     typedef detail::ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
 

@@ -18,7 +18,7 @@ public:
   typedef typename Fwd::Result Result;
   typedef std::integral_constant<bool, true> ForceMember;
 
-  template <typename T> struct ReturnType : Fwd::ReturnType<T> { };
+  template <typename T> struct ReturnType : Fwd::template ReturnType<T> { };
 
   template <typename Builder, typename SubType> static Result buildWrappedCall()
     {
@@ -86,7 +86,7 @@ public:
 
   template <typename Return, typename T> static void packReturn(CallData data, T &&result)
     {
-    Fwd::packReturn<Return>(data, result);
+    Fwd::template packReturn<Return>(data, result);
     }
   };
 
