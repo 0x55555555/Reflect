@@ -9,6 +9,7 @@ namespace detail
 template <typename T> typename std::add_rvalue_reference<T>::type declval();
 }
 
+
 /// \brief Diverts the this argument of a call to the first parameter for
 /// the function, then passes all the other arguments second.
 template <typename Fwd> class MethodInjectorBuilder
