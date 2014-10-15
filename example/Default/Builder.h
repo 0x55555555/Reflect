@@ -469,8 +469,13 @@ public:
     return Caster<T>::canCast(args->boxer, args->args->ths);
     }
 
+  template <typename Arg> class ReturnType
+    {
+    typedef typename Caster<Arg>::Result Type;
+    };
+
   template <typename Arg>
-      static typename Caster<Arg>::Result unpackArgument(CallData data, bool, size_t i)
+      static typename ReturnType<Arg>::Type unpackArgument(CallData data, bool, size_t i)
     {
     if (data->args->argCount <= i)
       {
