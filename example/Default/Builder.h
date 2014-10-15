@@ -469,7 +469,7 @@ public:
     return Caster<T>::canCast(args->boxer, args->args->ths);
     }
 
-  template <typename Arg> class ReturnType
+  template <typename Arg> struct ReturnType
     {
     typedef typename Caster<Arg>::Result Type;
     };
