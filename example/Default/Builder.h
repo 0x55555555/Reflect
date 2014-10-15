@@ -475,7 +475,7 @@ public:
     };
 
   template <typename Arg>
-      static typename ReturnType<Arg>::Type unpackArgument(CallData data, bool, size_t i)
+      static typename Caster<Arg>::Result unpackArgument(CallData data, bool, size_t i)
     {
     if (data->args->argCount <= i)
       {
