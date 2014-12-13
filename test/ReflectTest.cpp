@@ -91,7 +91,6 @@ template <> struct TypeResolver<A>
     return &t;
     }
   };
-
 }
 }
 

@@ -35,4 +35,5 @@ private Q_SLOTS:
   void canCallTest();
   void overloadingTest();
   void parentingTest();
+  void privateConstructorClassTest();
   };

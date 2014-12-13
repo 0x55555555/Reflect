@@ -76,6 +76,19 @@ public:
   std::unique_ptr<Vector3> m_ptr;
   };
 
+class PrivateConstructorDestructor
+  {
+  int data;
+
+private:
+  PrivateConstructorDestructor() { }
+  PrivateConstructorDestructor(const PrivateConstructorDestructor &) { }
+  PrivateConstructorDestructor &operator=(const PrivateConstructorDestructor &) { return *this; }
+  ~PrivateConstructorDestructor() { }
+
+  friend class ReflectTest;
+  };
+
 namespace Crate
 {
 namespace detail
@@ -122,6 +135,16 @@ template <> struct TypeResolver<NonCopyableReferencable>
     }
   };
 
+template <> struct TypeResolver<PrivateConstructorDestructor>
+  {
+  static const Type *find()
+    {
+    static Type t;
+    t.initialise<PrivateConstructorDestructor>("PrivateConstructorDestructor", nullptr);
+    return &t;
+    }
+  };
+
 }
 }
 
@@ -133,12 +156,16 @@ template <> class Traits<NonCopyable> : public ReferenceTraits<NonCopyable>
 template <> class Traits<NonCopyableReferencable> : public ReferenceNonCleanedTraits<NonCopyableReferencable>
   {
   };
+template <> class Traits<PrivateConstructorDestructor> : public ReferenceNonCleanedTraits<PrivateConstructorDestructor>
+  {
+  };
 }
 
 typedef Crate::Traits<Vector3> Vector3Traits;
 typedef Crate::Traits<Vector3Better> Vector3BetterTraits;
 typedef Crate::Traits<NonCopyable> NonCopyableTraits;
 typedef Crate::Traits<NonCopyableReferencable> NonCopyableReferencableTraits;
+typedef Crate::Traits<PrivateConstructorDestructor> PrivateConstructorDestructorTraits;
 
 void ReflectTest::typeCheckTest()
   {
@@ -405,3 +432,12 @@ void ReflectTest::parentingTest()
   QVERIFY(Vector3BetterTraits::unbox(&boxer, vec3BetterObj.get()));
   }
 
+void ReflectTest::privateConstructorClassTest()
+  {
+  Reflect::example::Boxer boxer;
+  auto obj = boxer.create<PrivateConstructorDestructorTraits>();
+
+  PrivateConstructorDestructor test;
+
+  PrivateConstructorDestructorTraits::box(&boxer, obj.get(), &test);
+  }
