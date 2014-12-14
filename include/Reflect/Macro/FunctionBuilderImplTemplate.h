@@ -19,14 +19,13 @@ template <typename InvHelper, typename FunctionHelper, typename FunctionHelper::
     {
     typedef typename FunctionHelper::Arguments Args;
 
-    // Call the function, unpacking arguments, collect the return.
-    auto&& result = FunctionHelper::template call<Fn, InvHelper>(
-      data
-      REFLEX_TEMPLATE_UNPACK(UNPACK_HELPER)
+    // Call the function, unpacking arguments, collect the return, and pack it.
+    ReturnPacker<T, InvHelper>::pack(data,
+      FunctionHelper::template call<Fn, InvHelper>(
+        data
+        REFLEX_TEMPLATE_UNPACK(UNPACK_HELPER)
+        )
       );
-
-    // Pack the return into data.
-    ReturnPacker<T, InvHelper>::pack(data, std::move(result));
     }
   };
 
