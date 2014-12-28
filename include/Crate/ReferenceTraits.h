@@ -15,7 +15,7 @@ template <typename T> class ReferenceTraits : public BaseTraits<T, ReferenceTrai
 
   typedef BaseTraits<T, ReferenceTraits<T>> Base;
 
-  template <typename Box> static T **getMemory(Box *ifc, typename Box::BoxedData data)
+  template <typename Box, typename Data> static T **getMemory(Box *ifc, Data data)
     {
     return static_cast<T **>(ifc->getMemory(data));
     }
@@ -33,7 +33,7 @@ template <typename T> class ReferenceTraits : public BaseTraits<T, ReferenceTrai
     delete mem;
     }
   
-  template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
+  template<typename Box, typename Boxable> static void box(Box *ifc, Boxable data, T *dataIn)
     {
     if (ifc->template initialise<ReferenceTraits<T>, T>(data, Base::getType(), dataIn, cleanup<Box>) == Base::AlreadyInitialised)
       {

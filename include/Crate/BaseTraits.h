@@ -37,7 +37,7 @@ public:
   typedef std::integral_constant<bool, false> Managed;
   typedef T *UnboxResult;
 
-  template<typename Box> static bool canUnbox(Box *ifc, typename Box::BoxedData data);
+  template<typename Box, typename Data> static bool canUnbox(Box *ifc, Data data);
 
   static const Type *getType();
   
@@ -45,7 +45,7 @@ public:
   };
 
 
-template <typename T, typename Derived> template<typename Box> bool BaseTraits<T, Derived>::canUnbox(Box *ifc, typename Box::BoxedData data)
+template <typename T, typename Derived> template<typename Box, typename Data> bool BaseTraits<T, Derived>::canUnbox(Box *ifc, Data data)
   {
   const auto neededType = getType();
   for (auto type = ifc->getType(data); type; type = type->parent())

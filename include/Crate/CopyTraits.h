@@ -13,7 +13,7 @@ public:
 
   typedef BaseTraits<T, CopyTraits<T>> Base;
 
-  template <typename Box> static T *getMemory(Box *ifc, typename Box::BoxedData data)
+  template <typename Box, typename Data> static T *getMemory(Box *ifc, Data data)
     {
     auto mem = ifc->getMemory(data);
 
@@ -38,7 +38,7 @@ public:
     mem->~T();
     }
 
-  template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, const T *dataIn)
+  template<typename Box, typename Boxable> static void box(Box *ifc, Boxable data, const T *dataIn)
     {
     if (ifc->template initialise<CopyTraits<T>, T>(data, Base::getType(), dataIn, cleanup<Box>) == Base::AlreadyInitialised)
       {

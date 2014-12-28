@@ -36,7 +36,7 @@ public:
     RootTraits::cleanup(ifc, data);
     }
   
-  template<typename Box> static void box(Box *ifc, typename Box::BoxedData data, T *dataIn)
+  template<typename Box, typename Boxable> static void box(Box *ifc, Boxable data, T *dataIn)
     {
     return RootTraits::box(ifc, data, dataIn);
     }
