@@ -125,6 +125,7 @@ template <std::size_t _Count, typename _Fn> struct FunctionArgCountSelectorBlock
   {
   typedef std::integral_constant<std::size_t, _Count> Count;
   typedef _Fn Function;
+  typedef typename Function::Helper Helper;
   };
 
 }

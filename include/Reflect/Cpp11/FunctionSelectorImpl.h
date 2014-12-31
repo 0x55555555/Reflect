@@ -1,6 +1,7 @@
 #pragma once
 #include "Reflect/Utils/CanCallHelper.h"
 #include "Reflect/Utils/Exceptions.h"
+#include "Reflect/Utils/StaticCombiner.h"
 
 namespace Reflect
 {
@@ -11,6 +12,10 @@ template <typename... Functions> class FunctionArgumentTypeSelector
 public:
   typedef FunctionArgumentTypeSelector<Functions...> ThisType;
   typedef std::tuple<Functions...> Selection;
+  struct Helper
+    {
+    typedef typename StaticCombiner<Selection>::Value Static;
+    };
 
   /// \brief Call to invoke the first matching function.
   /// \param data The data containing the arguments which are passed to the function.
@@ -39,6 +44,10 @@ template <typename... Functions> class FunctionArgumentCountSelector
 public:
   typedef FunctionArgumentCountSelector<Functions...> ThisType;
   typedef std::tuple<Functions...> Selection;
+  struct Helper
+    {
+    typedef typename StaticCombiner<Selection>::Value Static;
+    };
 
   /// \brief Call to invoke the first matching function.
   /// \param data The data containing the arguments which are passed to the function.

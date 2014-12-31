@@ -3,6 +3,7 @@
 #include "Crate/ReferenceTraits.h"
 #include "Crate/ReferenceNonCleanedTraits.h"
 #include "Crate/DerivedTraits.h"
+#include "Crate/SmartPointerTraits.h"
 #include "Crate/EnumTraits.h"
 
 namespace Crate

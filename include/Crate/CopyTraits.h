@@ -1,17 +1,18 @@
 #pragma once
 #include "Crate/BaseTraits.h"
+#include "assert.h"
 
 namespace Crate
 {
 
-/// \brief CopyTraits stores a copy of a class in memory owned by the receiver.
-template <typename T> class CopyTraits : public BaseTraits<T, CopyTraits<T>>
+/// \brief CopyTraitsBases stores a copy of a class in memory owned by the receiver.
+template <typename T, typename Derived> class CopyTraitsBase : public BaseTraits<T, Derived>
   {
 public:
   typedef std::integral_constant<size_t, sizeof(T)> TypeSize;
   typedef std::integral_constant<size_t, detail::alignment_of<T>::value < 4 ? 4 : detail::alignment_of<T>::value> TypeAlignment;
 
-  typedef BaseTraits<T, CopyTraits<T>> Base;
+  typedef BaseTraits<T, Derived> Base;
 
   template <typename Box, typename Data> static T *getMemory(Box *ifc, Data data)
     {
@@ -38,16 +39,26 @@ public:
     mem->~T();
     }
 
-  template<typename Box, typename Boxable> static void box(Box *ifc, Boxable data, const T *dataIn)
+  template<typename Box, typename Boxable> static void box(Box *ifc, Boxable data, T *dataIn)
     {
-    if (ifc->template initialise<CopyTraits<T>, T>(data, Base::getType(), dataIn, cleanup<Box>) == Base::AlreadyInitialised)
+    if (ifc->template initialise<Derived, T>(data, Base::getType(), dataIn, cleanup<Box>) == Base::AlreadyInitialised)
       {
       return;
       }
 
     T *memory = getMemory(ifc, data);
-    new(memory) T(*dataIn);
+    new(memory) T(std::move(*dataIn));
     }
+
+  static const void *makeObjectKey(const T *)
+    {
+    assert(false);
+    return nullptr;
+    }
+  };
+
+template <typename T> class CopyTraits : public CopyTraitsBase<T, CopyTraits<T>>
+  {
   };
 
 }

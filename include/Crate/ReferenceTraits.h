@@ -43,6 +43,11 @@ template <typename T> class ReferenceTraits : public BaseTraits<T, ReferenceTrai
     T **memory = getMemory(ifc, data);
     *memory = dataIn;
     }
+
+  static const void *makeObjectKey(const T *t)
+    {
+    return t;
+    }
   };
 
 }

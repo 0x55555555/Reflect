@@ -1,5 +1,6 @@
 #pragma once
 #include "Reflect/Utils/CanCallHelper.h"
+#include "Reflect/Utils/StaticCombiner.h"
 #include <type_traits>
 #include <tuple>
 
@@ -47,6 +48,10 @@ public:
                                        : 8> Index;
 
   typedef typename std::tuple_element<Index::value-1, SelectionOptions>::type Selection;
+  struct Helper
+    {
+    typedef typename StaticCombiner<Selection>::Value Static;
+    };
 
   /// \brief Call to invoke the first matching function.
   /// \param data The data containing the arguments which are passed to the function.
@@ -103,6 +108,10 @@ public:
                                        : 8> Index;
 
   typedef typename std::tuple_element<Index::value-1, SelectionOptions>::type Selection;
+  struct Helper
+    {
+    typedef typename StaticCombiner<Selection>::Value Static;
+    };
 
   /// \brief Call to invoke the first matching function.
   /// \param data The data containing the arguments which are passed to the function.

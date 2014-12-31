@@ -17,9 +17,12 @@ enum EmbeddedType
   EmbeddedTypeCount
   };
 
+}
+}
+
 #define EMBEDDED_TYPE(type) \
-  template <> struct TypeResolver<type> { \
-  static const Type *find() { static Type t; t.initialise<type>(#type, nullptr); return &t; } };
+  template <> struct Crate::detail::TypeResolver<type> { \
+  static const Crate::Type *find() { static Crate::Type t; t.initialise<type>(#type, nullptr); return &t; } };
 
 EMBEDDED_TYPE(void)
 EMBEDDED_TYPE(bool)
@@ -39,6 +42,3 @@ EMBEDDED_TYPE(wchar_t *)
 
 #undef EMBEDDED_TYPE
 
-
-}
-}
