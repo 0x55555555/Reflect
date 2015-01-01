@@ -41,7 +41,7 @@ public:
 
   static const Type *getType();
   
-  template <typename Box> static void checkUnboxable(Box *ifc, typename Box::BoxedData data);
+  template <typename Box, typename Data> static void checkUnboxable(Box *ifc, Data data);
   };
 
 

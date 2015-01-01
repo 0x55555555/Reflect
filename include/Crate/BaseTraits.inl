@@ -11,7 +11,7 @@ template <typename T, typename Derived> const Type *BaseTraits<T, Derived>::getT
   return findType<T>();
   }
 
-template <typename T, typename Derived> template <typename Box> void BaseTraits<T, Derived>::checkUnboxable(Box *ifc, typename Box::BoxedData data)
+template <typename T, typename Derived> template <typename Box, typename Data> void BaseTraits<T, Derived>::checkUnboxable(Box *ifc, Data data)
   {
   if (!Derived::canUnbox(ifc, data))
     {

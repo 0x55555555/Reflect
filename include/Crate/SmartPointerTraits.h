@@ -11,6 +11,7 @@ template <typename T> class SmartPointerTraits : public CopyTraitsBase<T, SmartP
 public:
   typedef std::integral_constant<bool, true> Managed;
   typedef T Pointer;
+  typedef CopyTraitsBase<T, SmartPointerTraits<T>> Base;
 
   static const void *makeObjectKey(const T *t)
     {
@@ -24,6 +25,7 @@ template <typename T> class WeakSmartPointerTraits : public CopyTraitsBase<T, We
 public:
   typedef std::integral_constant<bool, true> Managed;
   typedef T Pointer;
+  typedef CopyTraitsBase<T, WeakSmartPointerTraits<T>> Base;
 
   static const void *makeObjectKey(const T *t)
     {
@@ -38,6 +40,10 @@ public:
   struct UnboxResult
     {
     typename SmartPointerTraits::Pointer *t;
+    UnboxResult(typename SmartPointerTraits::Pointer *val) : t(val)
+      {
+      REFLECT_ASSERT(t->get());
+      }
 
     operator T*()
       {
@@ -53,6 +59,11 @@ public:
   template<typename Box> static UnboxResult unbox(Box *ifc, typename Box::BoxedData data)
     {
     auto smartPointer = SmartPointerTraits::unbox(ifc, data);
+
+    if (!*smartPointer)
+      {
+      throw Crate::TypeException(Crate::findType<T>(), Crate::findType<void>());
+      }
 
     return UnboxResult{smartPointer};
     }

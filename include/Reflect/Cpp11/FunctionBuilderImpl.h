@@ -133,6 +133,7 @@ public:
     {
     // Get this for the class
     auto cls = InvHelper::template unpackThis<Cls*>(data);
+    REFLECT_ASSERT(cls);
 
     return (cls->*Fn)(std::forward<Args>(args)...);
     }
@@ -161,6 +162,7 @@ template <typename Rt, typename Cls, typename... Args>
     {
     // Get this for the class
     auto cls = InvHelper::template unpackThis<Cls*>(data);
+    REFLECT_ASSERT(cls);
 
     return (cls->*Fn)(std::forward<Args>(args)...);
     }
