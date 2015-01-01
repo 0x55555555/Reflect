@@ -50,6 +50,17 @@ public:
     new(memory) T(std::move(*dataIn));
     }
 
+  template<typename Box, typename Boxable> static void box(Box *ifc, Boxable data, const T *dataIn)
+    {
+    if (ifc->template initialise<Derived, T>(data, Base::getType(), dataIn, cleanup<Box>) == Base::AlreadyInitialised)
+      {
+      return;
+      }
+
+    T *memory = getMemory(ifc, data);
+    new(memory) T(*dataIn);
+    }
+
   static const void *makeObjectKey(const T *)
     {
     assert(false);
