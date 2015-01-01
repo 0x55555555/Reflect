@@ -1,5 +1,6 @@
 #pragma once
 #include "Crate/CopyTraits.h"
+#include <memory>
 
 namespace Crate
 {
