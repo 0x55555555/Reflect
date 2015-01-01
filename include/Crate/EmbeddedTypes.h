@@ -21,8 +21,8 @@ enum EmbeddedType
 }
 
 #define EMBEDDED_TYPE(type) \
-  template <> struct Crate::detail::TypeResolver<type> { \
-  static const Crate::Type *find() { static Crate::Type t; t.initialise<type>(#type, nullptr); return &t; } };
+  namespace Crate { namespace detail { template <> struct TypeResolver<type> { \
+  static const Type *find() { static Type t; t.initialise<type>(#type, nullptr); return &t; } }; } }
 
 EMBEDDED_TYPE(void)
 EMBEDDED_TYPE(bool)
