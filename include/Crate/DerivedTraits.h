@@ -19,7 +19,7 @@ public:
   typedef BaseTraits<T, DerivedTraits<T, Parent, Root>> BaseClassTraits;
   typedef Traits<Root> RootTraits;
 
-  template<typename Box> static bool canUnbox(Box *ifc, typename Box::BoxedData data)
+  template<typename Box, typename Data> static bool canUnbox(Box *ifc, Data data)
     {
     return BaseClassTraits::canUnbox(ifc, data);
     }

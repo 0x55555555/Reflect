@@ -81,6 +81,7 @@ public:
   typedef Cls Class;
   typedef Rt ReturnType;
   typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
+  typedef std::tuple_size<Arguments> ArgumentCount;
   typedef Rt(Class::*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER));
 
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
@@ -109,6 +110,7 @@ template <typename Rt, typename Cls REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
   typedef Cls Class;
   typedef Rt ReturnType;
   typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
+  typedef std::tuple_size<Arguments> ArgumentCount;
   typedef Rt(Class::*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)) const;
 
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))
@@ -137,6 +139,7 @@ template <typename Rt REFLEX_TEMPLATE_UNPACK(TYPENAME_HELPER)>
   typedef void Class;
   typedef Rt ReturnType;
   typedef std::tuple<REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER)> Arguments;
+  typedef std::tuple_size<Arguments> ArgumentCount;
   typedef ReturnType (*Signature)(REFLEX_TEMPLATE_UNPACK_COMMA(ARG_HELPER));
 
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData REFLEX_TEMPLATE_UNPACK(PARAM_HELPER))

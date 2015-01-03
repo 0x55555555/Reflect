@@ -372,7 +372,6 @@ public:
     Boxer *boxer;
     };
   typedef Call *CallData;
-  typedef std::integral_constant<bool, false> ForceMember;
 
 #if REFLECT_DESCRIPTIVE_EXCEPTIONS
   static std::string describeArguments(CallData args)

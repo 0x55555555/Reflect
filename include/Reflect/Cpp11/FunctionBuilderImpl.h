@@ -66,6 +66,8 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
   {
   typedef _FunctionHelper Helper;
   typedef _Caller Caller;
+  typedef FunctionCall<Helper, Fn, Caller> ThisType;
+  typedef typename Caller::template Helper<ThisType> CallHelper;
 
   /// \brief Call to invoke the function.
   /// \param data The data containing the arguments which are passed to the function.
@@ -78,10 +80,10 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
     // The correct dispatcher - based on the ReturnType.
     typedef detail::ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
 
-    typedef typename Helper::Static Static;
-    typedef typename Caller::ForceMember ForceMember;
-    std::size_t expectedThisArgs = (!ForceMember::value && Helper::Static::value) ? 0 : 1;
-    std::size_t expectedArgs = (std::size_t)ArgCount::value + expectedThisArgs;
+    typedef typename CallHelper::Static Static;
+    typedef typename CallHelper::ArgumentCount RequiredArgCount;
+    std::size_t expectedThisArgs = Static::value ? 0 : 1;
+    std::size_t expectedArgs = (std::size_t)RequiredArgCount::value + expectedThisArgs;
 
     if (InvHelper::getArgumentCountWithThis(data) != expectedArgs)
       {
@@ -127,6 +129,7 @@ public:
   typedef Cls Class;
   typedef Rt ReturnType;
   typedef std::tuple<Args...> Arguments;
+  typedef std::tuple_size<Arguments> ArgumentCount;
   typedef Rt(Class::*Signature)(Args...);
 
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data, Args... args)
@@ -156,6 +159,7 @@ template <typename Rt, typename Cls, typename... Args>
   typedef Cls Class;
   typedef Rt ReturnType;
   typedef std::tuple<Args...> Arguments;
+  typedef std::tuple_size<Arguments> ArgumentCount;
   typedef Rt(Class::*Signature)(Args...) const;
 
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData data, Args... args)
@@ -185,6 +189,7 @@ template <typename Rt, typename... Args>
   typedef void Class;
   typedef Rt ReturnType;
   typedef std::tuple<Args...> Arguments;
+  typedef std::tuple_size<Arguments> ArgumentCount;
   typedef ReturnType (*Signature)(Args...);
 
   template <Signature Fn, typename InvHelper> static ReturnType call(typename InvHelper::CallData, Args... args)

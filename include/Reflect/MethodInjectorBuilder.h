@@ -17,7 +17,13 @@ template <typename Fwd> class MethodInjectorBuilder
 public:
   typedef typename Fwd::CallData CallData;
   typedef typename Fwd::Result Result;
-  typedef std::integral_constant<bool, true> ForceMember;
+
+  template <typename T> struct Helper
+    {
+    typedef typename T::Helper WrappedHelper;
+    typedef std::integral_constant<bool, false> Static;
+    typedef std::integral_constant<size_t, WrappedHelper::ArgumentCount::value - 1> ArgumentCount;
+    };
 
   template <typename T> struct ReturnType : Fwd::template ReturnType<T> { };
 

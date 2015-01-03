@@ -97,6 +97,13 @@ template <> struct TypeResolver<A>
 class InvocationBuilder : public Reflect::example::Builder
   {
 public:
+  template <typename T> struct Helper
+    {
+    typedef typename T::Helper WrappedHelper;
+    typedef std::tuple_size<typename WrappedHelper::Arguments> ArgumentCount;
+    typedef typename WrappedHelper::Static Static;
+    };
+
   struct Result
     {
     typedef void (*Signature)(Reflect::example::Boxer *, Arguments *);
@@ -220,8 +227,10 @@ void ReflectTest::methodInjectionTest()
   int b = INT_VAL;
   float c = FLOAT_VAL;
 
-  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildWrappedCall<
-    FunctionCall<Fn, &staticMethod, InvocationBuilder>, MethodInjectorBuilder<InvocationBuilder>>();
+  typedef FunctionCall<Fn, &staticMethod, MethodInjectorBuilder<InvocationBuilder>> Call;
+  auto inv1 = MethodInjectorBuilder<InvocationBuilder>::buildWrappedCall<Call, MethodInjectorBuilder<InvocationBuilder>>();
+
+  //static_assert(Call::Helper::value, "Injected methods should force members");
 
   Reflect::example::Boxer boxer;
 

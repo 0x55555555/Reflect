@@ -105,6 +105,8 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
   {
   typedef _FunctionHelper Helper;
   typedef _Caller Caller;
+  typedef FunctionCall<Helper, Fn, Caller> ThisType;
+  typedef typename Caller::template Helper<ThisType> CallHelper;
 
   /// \brief Call to invoke the function.
   /// \param data The data containing the arguments which are passed to the function.
@@ -119,10 +121,11 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
       Fn,
       typename Helper::ReturnType> CallDispatch;
 
-    std::size_t expectedThisArgs = Helper::Static::value ? 0 : 1;
-    std::size_t expectedArgs = (std::size_t)ArgCount::value + expectedThisArgs;
+    typedef typename CallHelper::Static Static;
+    typedef typename CallHelper::ArgumentCount RequiredArgCount;
+    std::size_t expectedThisArgs = Static::value ? 0 : 1;
+    std::size_t expectedArgs = (std::size_t)RequiredArgCount::value + expectedThisArgs;
 
-    typedef typename Helper::Static Static;
     if (Caller::getArgumentCountWithThis(data) != expectedArgs)
       {
       throw ArgCountException(

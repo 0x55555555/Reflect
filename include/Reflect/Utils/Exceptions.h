@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <string>
 #include <stdint.h>
+#include "Reflect/Global.h"
 #include "TupleEach.h"
 
 namespace Reflect
@@ -162,6 +163,27 @@ protected:
   std::string m_error;
   std::size_t m_expected;
   std::size_t m_actual;
+  };
+
+/// \brief Thrown if a callback fails and throws a script error.
+class CallbackException : public Reflect::CallException
+  {
+public:
+  CallbackException(const std::string &s = std::string())
+      : m_err(s)
+    {
+    }
+
+  ~CallbackException() throw()
+    {
+    }
+
+  const char *what() const throw() X_OVERRIDE
+    {
+    return m_err.data();
+    }
+
+  std::string m_err;
   };
 
 }

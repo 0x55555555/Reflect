@@ -111,6 +111,7 @@ public:
   struct Helper
     {
     typedef typename StaticCombiner<Selection>::Value Static;
+    typedef std::integral_constant<size_t, 0> ArgCount;
     };
 
   /// \brief Call to invoke the first matching function.
