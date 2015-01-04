@@ -178,7 +178,7 @@ public:
     {
     }
 
-  const char *what() const throw() override
+  const char *what() const throw()
     {
     return m_err.data();
     }
