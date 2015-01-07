@@ -24,7 +24,7 @@ public:
     return BaseClassTraits::canUnbox(ifc, data);
     }
 
-  template<typename Box> static T *unbox(Box *ifc, typename Box::BoxedData data)
+  template<typename Box, typename Data> static T *unbox(Box *ifc, Data data)
     {
     RootTraits::checkUnboxable(ifc, data);
 

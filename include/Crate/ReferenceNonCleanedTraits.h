@@ -21,7 +21,7 @@ public:
     return static_cast<T **>(ifc->getMemory(data));
     }
 
-  template<typename Box> static T *unbox(Box *ifc, typename Box::BoxedData data)
+  template<typename Box, typename Data> static T *unbox(Box *ifc, Data data)
     {
     Base::checkUnboxable(ifc, data);
 

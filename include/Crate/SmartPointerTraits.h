@@ -56,7 +56,7 @@ public:
     return SmartPointerTraits::canUnbox(ifc, data);
     }
 
-  template<typename Box> static UnboxResult unbox(Box *ifc, typename Box::BoxedData data)
+  template<typename Box, typename Data> static UnboxResult unbox(Box *ifc, Data data)
     {
     auto smartPointer = SmartPointerTraits::unbox(ifc, data);
 
