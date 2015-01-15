@@ -53,6 +53,11 @@ public:
     {
     ifc->boxEnum(data, (int)*dataIn);
     }
+
+  template<typename Box, typename Data> static bool canUnbox(Box *ifc, Data data)
+    {
+    return ifc->canUnboxEnum(data);
+    }
   };
 
 }
