@@ -14,7 +14,11 @@ public:
   struct EnumWrap
     {
     typedef T DereferenceResult;
-    EnumWrap(int t) : m_t((T)t)
+    EnumWrap(std::nullptr_t) : m_valid(false)
+      {
+      }
+
+    EnumWrap(int t) : m_valid(true), m_t((T)t)
       {
       }
 
@@ -33,11 +37,17 @@ public:
       return m_t;
       }
 
+    operator bool()
+      {
+      return m_valid;
+      }
+
     operator T()
       {
       return m_t;
       }
 
+    bool m_valid;
     T m_t;
     };
 

@@ -40,14 +40,23 @@ public:
   struct UnboxResult
     {
     typename SmartPointerTraits::Pointer *t;
+    UnboxResult(std::nullptr_t) : t(nullptr)
+      {
+      }
+
     UnboxResult(typename SmartPointerTraits::Pointer *val) : t(val)
       {
       REFLECT_ASSERT(t->get());
       }
 
+    operator bool()
+      {
+      return true;
+      }
+
     operator T*()
       {
-      return t->get();
+      return t ? t->get() : nullptr;
       }
     };
 
