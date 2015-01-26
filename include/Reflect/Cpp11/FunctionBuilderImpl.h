@@ -78,7 +78,7 @@ template <typename _FunctionHelper, typename _FunctionHelper::Signature Fn, type
     // Indices for the arguments.
     typedef detail::BuildIndices<ArgCount::value> IndicesForFunction;
     // The correct dispatcher - based on the ReturnType.
-    typedef detail::ReturnDispatch<InvHelper, Helper, Fn, typename Helper::ReturnType> Dispatch;
+    typedef detail::ReturnDispatch<Caller, Helper, Fn, typename Helper::ReturnType> Dispatch;
 
     typedef typename CallHelper::Static Static;
     typedef typename CallHelper::ArgumentCount RequiredArgCount;
